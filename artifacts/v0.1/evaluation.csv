@@ -1,0 +1,9 @@
+case,seed,variant,strips,shuffle_seed,baseline_adjacency,baseline_position,baseline_exact,learned_adjacency,learned_position,learned_exact,image
+1,3001,report,8,41,1.0,1.0,True,1.0,1.0,True,case-01-report-8-strips.png
+2,3002,table,9,42,1.0,1.0,True,1.0,1.0,True,case-02-table-9-strips.png
+3,3003,mixed,10,43,1.0,1.0,True,1.0,1.0,True,case-03-mixed-10-strips.png
+4,3004,sparse,10,44,0.6666666666666666,0.8,False,1.0,1.0,True,case-04-sparse-10-strips.png
+5,3005,report,11,45,1.0,1.0,True,1.0,1.0,True,case-05-report-11-strips.png
+6,3006,table,12,46,1.0,1.0,True,1.0,1.0,True,case-06-table-12-strips.png
+7,3007,mixed,12,47,1.0,1.0,True,1.0,1.0,True,case-07-mixed-12-strips.png
+8,3008,sparse,12,48,0.7272727272727273,0.8333333333333334,False,0.7272727272727273,0.8333333333333334,False,case-08-sparse-12-strips.png

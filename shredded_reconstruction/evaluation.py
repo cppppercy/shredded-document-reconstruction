@@ -1,0 +1,92 @@
+"""End-to-end reconstruction and honest order metrics."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from collections.abc import Sequence
+
+from PIL import Image
+
+from .baseline import reconstruct_baseline
+from .document import generate_document
+from .learned import CompatibilityModel
+from .shred import ShreddedDocument, compose_strips, shred_document
+
+
+def order_metrics(predicted_positions: Sequence[int], original_indices: Sequence[int]) -> dict[str, float | bool | list[int]]:
+    """Evaluate a prediction after reconstruction; labels never enter prediction."""
+    count = len(original_indices)
+    if sorted(predicted_positions) != list(range(count)):
+        raise ValueError("predicted_positions must permute shuffled input positions")
+    predicted_original = [int(original_indices[position]) for position in predicted_positions]
+    correct = list(range(count))
+    position_accuracy = sum(a == b for a, b in zip(predicted_original, correct, strict=True)) / count
+    correct_adjacencies = sum(
+        right == left + 1 for left, right in zip(predicted_original, predicted_original[1:])
+    )
+    adjacency_accuracy = correct_adjacencies / max(1, count - 1)
+    concordant = sum(
+        predicted_original[i] < predicted_original[j]
+        for i in range(count)
+        for j in range(i + 1, count)
+    )
+    relative_order_accuracy = concordant / max(1, count * (count - 1) // 2)
+    return {
+        "predicted_original_order": predicted_original,
+        "correct_original_order": correct,
+        "position_accuracy": float(position_accuracy),
+        "adjacency_accuracy": float(adjacency_accuracy),
+        "relative_order_accuracy": float(relative_order_accuracy),
+        "exact_match": predicted_original == correct,
+    }
+
+
+@dataclass
+class CaseResult:
+    seed: int
+    variant: str
+    strip_count: int
+    original: Image.Image
+    shredded: ShreddedDocument
+    baseline_order: list[int]
+    baseline_reconstruction: Image.Image
+    baseline_metrics: dict[str, float | bool | list[int]]
+    learned_order: list[int] | None
+    learned_reconstruction: Image.Image | None
+    learned_metrics: dict[str, float | bool | list[int]] | None
+
+
+def run_case(
+    *,
+    seed: int,
+    variant: str,
+    strip_count: int,
+    shuffle_seed: int,
+    model: CompatibilityModel | None = None,
+) -> CaseResult:
+    original = generate_document(seed=seed, variant=variant)
+    shredded = shred_document(original, strip_count=strip_count, shuffle_seed=shuffle_seed)
+    baseline_order, _ = reconstruct_baseline(shredded.strips)
+    baseline_image = compose_strips(shredded.strips, baseline_order)
+    baseline_metrics = order_metrics(baseline_order, shredded.original_indices)
+    if model is None:
+        learned_order = None
+        learned_image = None
+        learned_metrics = None
+    else:
+        learned_order, _ = model.reconstruct(shredded.strips)
+        learned_image = compose_strips(shredded.strips, learned_order)
+        learned_metrics = order_metrics(learned_order, shredded.original_indices)
+    return CaseResult(
+        seed,
+        variant,
+        strip_count,
+        original,
+        shredded,
+        baseline_order,
+        baseline_image,
+        baseline_metrics,
+        learned_order,
+        learned_image,
+        learned_metrics,
+    )
