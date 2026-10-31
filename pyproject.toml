@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "shredded-document-reconstruction"
-version = "0.1.0"
-description = "Reconstruct vertically shredded synthetic documents with learned compatibility and global optimization."
+version = "0.2.0"
+description = "Reconstruct vertically shredded synthetic documents under controlled image perturbations."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}

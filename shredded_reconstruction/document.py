@@ -169,8 +169,16 @@ def generate_document(
     seed: int,
     variant: str = "report",
     size: tuple[int, int] = (960, 720),
+    *,
+    with_border: bool = True,
+    with_texture: bool | None = None,
 ) -> Image.Image:
-    """Generate a document image without using external data or network access."""
+    """Generate a deterministic document image without external data.
+
+    ``with_texture=None`` preserves the V0.1 behaviour: sparse documents have
+    no continuous texture while the other variants do.  Passing ``False`` is
+    useful for a harder, less synthetic-looking ablation.
+    """
     if variant not in DOCUMENT_VARIANTS:
         raise ValueError(f"Unknown variant {variant!r}; expected one of {DOCUMENT_VARIANTS}")
     width, height = size
@@ -178,12 +186,11 @@ def generate_document(
         raise ValueError("Document size must be at least 480x360")
     np_rng = np.random.default_rng(seed)
     py_rng = random.Random(seed)
-    # Sparse documents intentionally omit continuous paper texture. Large blank
-    # regions then become genuinely ambiguous and expose realistic V0.1 limits
-    # instead of making every held-out case artificially easy.
-    image = Image.new("RGB", (width, height), (248, 248, 246)) if variant == "sparse" else _paper(width, height, np_rng)
+    use_texture = variant != "sparse" if with_texture is None else with_texture
+    image = _paper(width, height, np_rng) if use_texture else Image.new("RGB", (width, height), (248, 248, 246))
     draw = ImageDraw.Draw(image)
-    draw.rectangle((12, 12, width - 13, height - 13), outline=(92, 99, 107), width=2)
+    if with_border:
+        draw.rectangle((12, 12, width - 13, height - 13), outline=(92, 99, 107), width=2)
     {
         "report": _draw_report,
         "table": _draw_table,

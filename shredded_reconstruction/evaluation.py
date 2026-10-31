@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from collections.abc import Sequence
+from time import perf_counter
 
 from PIL import Image
 
 from .baseline import reconstruct_baseline
+from .conditions import observation_condition
 from .document import generate_document
 from .learned import CompatibilityModel
-from .shred import ShreddedDocument, compose_strips, shred_document
+from .shred import ShreddedDocument, compose_strips, disturb_document, shred_document
 
 
 def order_metrics(predicted_positions: Sequence[int], original_indices: Sequence[int]) -> dict[str, float | bool | list[int]]:
@@ -54,6 +56,10 @@ class CaseResult:
     learned_order: list[int] | None
     learned_reconstruction: Image.Image | None
     learned_metrics: dict[str, float | bool | list[int]] | None
+    condition: str = "clean"
+    observed_document: Image.Image | None = None
+    baseline_seconds: float = 0.0
+    learned_seconds: float | None = None
 
 
 def run_case(
@@ -63,10 +69,31 @@ def run_case(
     strip_count: int,
     shuffle_seed: int,
     model: CompatibilityModel | None = None,
+    condition_name: str = "clean",
+    baseline_max_vertical_shift: int = 0,
+    baseline_endpoint_weight: float = 1.0,
 ) -> CaseResult:
-    original = generate_document(seed=seed, variant=variant)
-    shredded = shred_document(original, strip_count=strip_count, shuffle_seed=shuffle_seed)
-    baseline_order, _ = reconstruct_baseline(shredded.strips)
+    condition = observation_condition(condition_name, seed=seed)
+    original = generate_document(
+        seed=seed,
+        variant=variant,
+        with_border=condition.with_border,
+        with_texture=condition.with_texture,
+    )
+    observed = disturb_document(original, condition.disturbance)
+    shredded = shred_document(
+        original,
+        strip_count=strip_count,
+        shuffle_seed=shuffle_seed,
+        disturbance=condition.disturbance,
+    )
+    started = perf_counter()
+    baseline_order, _ = reconstruct_baseline(
+        shredded.strips,
+        max_vertical_shift=baseline_max_vertical_shift,
+        endpoint_weight=baseline_endpoint_weight,
+    )
+    baseline_seconds = perf_counter() - started
     baseline_image = compose_strips(shredded.strips, baseline_order)
     baseline_metrics = order_metrics(baseline_order, shredded.original_indices)
     if model is None:
@@ -74,9 +101,13 @@ def run_case(
         learned_image = None
         learned_metrics = None
     else:
+        started = perf_counter()
         learned_order, _ = model.reconstruct(shredded.strips)
+        learned_seconds = perf_counter() - started
         learned_image = compose_strips(shredded.strips, learned_order)
         learned_metrics = order_metrics(learned_order, shredded.original_indices)
+    if model is None:
+        learned_seconds = None
     return CaseResult(
         seed,
         variant,
@@ -89,4 +120,8 @@ def run_case(
         learned_order,
         learned_image,
         learned_metrics,
+        condition_name,
+        observed,
+        baseline_seconds,
+        learned_seconds,
     )

@@ -24,13 +24,10 @@ def _gray(image: Image.Image) -> np.ndarray:
     return np.asarray(image.convert("L"), dtype=np.float32) / 255.0
 
 
-def compatibility_features(left: Image.Image, right: Image.Image, band: int = 8) -> np.ndarray:
-    """Describe the directed seam ``left -> right`` without using strip labels."""
-    if left.height != right.height:
-        raise ValueError("Strip heights must match")
-    a, b = _gray(left), _gray(right)
-    if a.shape[1] < 2 or b.shape[1] < 2:
-        raise ValueError("Strips must be at least two pixels wide")
+def _features_for_aligned_arrays(a: np.ndarray, b: np.ndarray, band: int) -> np.ndarray:
+    """Compute V0.1 features after the two arrays have been vertically aligned."""
+    if a.shape[0] < 3:
+        raise ValueError("At least three overlapping rows are required")
     width = max(2, min(band, a.shape[1], b.shape[1]))
     a_band, b_band = a[:, -width:], b[:, :width]
     last, first = a[:, -1], b[:, 0]
@@ -57,28 +54,57 @@ def compatibility_features(left: Image.Image, right: Image.Image, band: int = 8)
     )
     relative_roughness = seam_mae / (internal + 1e-4)
     return np.asarray(
-        [
-            seam_mae,
-            seam_rmse,
-            prediction_mae,
-            gradient_gap,
-            profile_mae,
-            correlation_loss,
-            band_mean_gap,
-            dark_disagreement,
-            relative_roughness,
-        ],
+        [seam_mae, seam_rmse, prediction_mae, gradient_gap, profile_mae, correlation_loss,
+         band_mean_gap, dark_disagreement, relative_roughness],
         dtype=np.float64,
     )
 
 
-def pairwise_feature_tensor(strips: Sequence[Image.Image]) -> np.ndarray:
+def compatibility_features(
+    left: Image.Image,
+    right: Image.Image,
+    band: int = 8,
+    max_vertical_shift: int = 0,
+) -> np.ndarray:
+    """Describe a directed seam, optionally searching a small non-wrapping offset.
+
+    The default is byte-for-byte equivalent in arithmetic to V0.1.  With a
+    positive shift range, candidate offsets are scored on only their genuine
+    overlapping rows; no rolled pixels can leak from the opposite edge.
+    """
+    if left.height != right.height:
+        raise ValueError("Strip heights must match")
+    if max_vertical_shift < 0 or max_vertical_shift * 2 + 3 > left.height:
+        raise ValueError("max_vertical_shift is incompatible with strip height")
+    a, b = _gray(left), _gray(right)
+    if a.shape[1] < 2 or b.shape[1] < 2:
+        raise ValueError("Strips must be at least two pixels wide")
+    candidates: list[np.ndarray] = []
+    for shift in range(-max_vertical_shift, max_vertical_shift + 1):
+        if shift >= 0:
+            aligned_a, aligned_b = a[shift:], b[: a.shape[0] - shift]
+        else:
+            aligned_a, aligned_b = a[: a.shape[0] + shift], b[-shift:]
+        candidates.append(_features_for_aligned_arrays(aligned_a, aligned_b, band))
+    # Avoid treating harmless noise as a displacement.  A non-zero candidate
+    # must improve this label-free local proxy by a meaningful 18%; otherwise
+    # preserving row alignment is more reliable on clean scans.
+    zero = candidates[max_vertical_shift]
+    best = min(candidates, key=lambda values: float(values[2] + values[0] + 0.35 * values[3]))
+    zero_score = float(zero[2] + zero[0] + 0.35 * zero[3])
+    best_score = float(best[2] + best[0] + 0.35 * best[3])
+    return best if best_score < 0.82 * zero_score else zero
+
+
+def pairwise_feature_tensor(strips: Sequence[Image.Image], max_vertical_shift: int = 0) -> np.ndarray:
     count = len(strips)
     result = np.zeros((count, count, len(FEATURE_NAMES)), dtype=np.float64)
     for left in range(count):
         for right in range(count):
             if left != right:
-                result[left, right] = compatibility_features(strips[left], strips[right])
+                result[left, right] = compatibility_features(
+                    strips[left], strips[right], max_vertical_shift=max_vertical_shift
+                )
     return result
 
 
