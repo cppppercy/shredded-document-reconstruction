@@ -25,6 +25,47 @@ def shuffled_montage(strips: Sequence[Image.Image]) -> Image.Image:
     return output
 
 
+def reconstruction_diagnostic(
+    strips: Sequence[Image.Image],
+    order: Sequence[int],
+    original_indices: Sequence[int],
+) -> Image.Image:
+    """Show a reconstruction with post-hoc, clearly labelled error markers.
+
+    ``original_indices`` is deliberately used only after an order has been
+    predicted.  The red frames are an evaluation aid for a classroom audience,
+    not information available to either reconstruction algorithm.
+    """
+    if sorted(order) != list(range(len(strips))):
+        raise ValueError("order must be a permutation of strip positions")
+    label_height = 46
+    width = sum(strips[position].width for position in order)
+    height = strips[0].height + label_height
+    output = Image.new("RGB", (width, height), (238, 242, 247))
+    draw = ImageDraw.Draw(output)
+    x = 0
+    for displayed_position, input_position in enumerate(order):
+        strip = strips[input_position]
+        true_position = original_indices[input_position]
+        correct = true_position == displayed_position
+        color = (48, 132, 87) if correct else (190, 67, 62)
+        output.paste(strip.convert("RGB"), (x, label_height))
+        draw.rectangle((x, label_height, x + strip.width - 1, height - 1), outline=color, width=3)
+        label = f"{displayed_position + 1}: {'OK' if correct else 'true=' + str(true_position + 1)}"
+        draw.text((x + 4, 13), label, fill=color, font=_font(13, bold=True))
+        x += strip.width
+    return output
+
+
+def wrong_positions(order: Sequence[int], original_indices: Sequence[int]) -> list[int]:
+    """Return one-based reconstructed positions whose true strip differs."""
+    return [
+        displayed_position + 1
+        for displayed_position, input_position in enumerate(order)
+        if original_indices[input_position] != displayed_position
+    ]
+
+
 def _panel(image: Image.Image, title: str, subtitle: str, size: tuple[int, int]) -> Image.Image:
     width, height = size
     canvas = Image.new("RGB", size, (244, 247, 251))
