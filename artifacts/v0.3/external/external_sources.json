@@ -1,0 +1,154 @@
+{
+  "sources": [
+    {
+      "source_id": "us-cbdc-technical-evaluation",
+      "title": "Technical Evaluation for a U.S. CBDC System (OSTP, 2022)",
+      "pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "pages_zero_based": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "source_id": "ai-bill-of-rights",
+      "title": "Blueprint for an AI Bill of Rights (OSTP, 2022)",
+      "pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "pages_zero_based": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "page_id": "us-cbdc-technical-evaluation:2",
+      "source_id": "us-cbdc-technical-evaluation",
+      "title": "Technical Evaluation for a U.S. CBDC System (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 2,
+      "rendered_file": "pages\\us-cbdc-technical-evaluation-page-02.png",
+      "pdf_sha256": "2004f9d802f280064015eab67d1a9c993e61c5301db137684295729cb327816c",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "us-cbdc-technical-evaluation:3",
+      "source_id": "us-cbdc-technical-evaluation",
+      "title": "Technical Evaluation for a U.S. CBDC System (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 3,
+      "rendered_file": "pages\\us-cbdc-technical-evaluation-page-03.png",
+      "pdf_sha256": "2004f9d802f280064015eab67d1a9c993e61c5301db137684295729cb327816c",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "us-cbdc-technical-evaluation:4",
+      "source_id": "us-cbdc-technical-evaluation",
+      "title": "Technical Evaluation for a U.S. CBDC System (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 4,
+      "rendered_file": "pages\\us-cbdc-technical-evaluation-page-04.png",
+      "pdf_sha256": "2004f9d802f280064015eab67d1a9c993e61c5301db137684295729cb327816c",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "us-cbdc-technical-evaluation:5",
+      "source_id": "us-cbdc-technical-evaluation",
+      "title": "Technical Evaluation for a U.S. CBDC System (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 5,
+      "rendered_file": "pages\\us-cbdc-technical-evaluation-page-05.png",
+      "pdf_sha256": "2004f9d802f280064015eab67d1a9c993e61c5301db137684295729cb327816c",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "us-cbdc-technical-evaluation:6",
+      "source_id": "us-cbdc-technical-evaluation",
+      "title": "Technical Evaluation for a U.S. CBDC System (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 6,
+      "rendered_file": "pages\\us-cbdc-technical-evaluation-page-06.png",
+      "pdf_sha256": "2004f9d802f280064015eab67d1a9c993e61c5301db137684295729cb327816c",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "ai-bill-of-rights:2",
+      "source_id": "ai-bill-of-rights",
+      "title": "Blueprint for an AI Bill of Rights (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 2,
+      "rendered_file": "pages\\ai-bill-of-rights-page-02.png",
+      "pdf_sha256": "64758f7813be333da2a28a9784f53eb9a73516e8aafda68c5bb6ad3d31ded149",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "ai-bill-of-rights:3",
+      "source_id": "ai-bill-of-rights",
+      "title": "Blueprint for an AI Bill of Rights (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 3,
+      "rendered_file": "pages\\ai-bill-of-rights-page-03.png",
+      "pdf_sha256": "64758f7813be333da2a28a9784f53eb9a73516e8aafda68c5bb6ad3d31ded149",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "ai-bill-of-rights:4",
+      "source_id": "ai-bill-of-rights",
+      "title": "Blueprint for an AI Bill of Rights (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 4,
+      "rendered_file": "pages\\ai-bill-of-rights-page-04.png",
+      "pdf_sha256": "64758f7813be333da2a28a9784f53eb9a73516e8aafda68c5bb6ad3d31ded149",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "ai-bill-of-rights:5",
+      "source_id": "ai-bill-of-rights",
+      "title": "Blueprint for an AI Bill of Rights (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 5,
+      "rendered_file": "pages\\ai-bill-of-rights-page-05.png",
+      "pdf_sha256": "64758f7813be333da2a28a9784f53eb9a73516e8aafda68c5bb6ad3d31ded149",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "ai-bill-of-rights:6",
+      "source_id": "ai-bill-of-rights",
+      "title": "Blueprint for an AI Bill of Rights (OSTP, 2022)",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "page_number_one_based": 6,
+      "rendered_file": "pages\\ai-bill-of-rights-page-06.png",
+      "pdf_sha256": "64758f7813be333da2a28a9784f53eb9a73516e8aafda68c5bb6ad3d31ded149",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    }
+  ]
+}

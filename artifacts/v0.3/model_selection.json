@@ -1,0 +1,21 @@
+{
+  "endpoint_multiplier_candidates": {
+    "0.0": {
+      "documents": 120,
+      "exact_recovery_rate": 0.4166666666666667,
+      "document_mean_adjacency": 0.7906806156806157,
+      "aggregate_adjacency": 0.7898148148148149,
+      "document_mean_position": 0.5989583333333334,
+      "mean_seconds": 0.8831090016666678
+    },
+    "0.8": {
+      "documents": 120,
+      "exact_recovery_rate": 0.39166666666666666,
+      "document_mean_adjacency": 0.7746392496392497,
+      "aggregate_adjacency": 0.7731481481481481,
+      "document_mean_position": 0.5958333333333333,
+      "mean_seconds": 0.533842592499991
+    }
+  },
+  "selected_endpoint_multiplier": 0.0
+}

@@ -2,124 +2,121 @@
 
 《机器学习导论》Final Project：**基于局部特征学习与全局优化的碎纸文档自动重建**。
 
-程序生成文字、表格和简单图文混排的文档，将其切成竖直纸条并打乱；重建器只读取打乱后的像素，根据局部接缝兼容度和全局路径优化预测纸条顺序。真实顺序仅在训练标注和预测完成后的评测中使用。
+程序将完整页面模拟切成 8、10 或 12 条竖直纸条并随机打乱；重建器只读取打乱后的像素，正确顺序仅用于训练标签和预测后的评测。
 
-V0.2 在 V0.1 的端到端流程上加入了受控的扫描干扰、边缘丢失和上下错位，并用固定的文档级训练/验证/测试划分进行评估。
+> 当前是规则竖直纸条的研究原型，不等同于物理碎纸扫描恢复；不处理旋转、重叠、任意碎片形状或缺失纸片。
 
-![V0.2 自动挑选的成功与失败案例](artifacts/v0.2/selected-cases-grid.png)
+![V0.3 自动选择的合成成功与失败案例](artifacts/v0.3/selected-cases-grid.png)
 
-左图是自动选出的最高分案例；右图是最低分案例，保留其拼接错误而没有美化结果。
+## V0.3 结果摘要
 
-## 已实现功能
+V0.3 使用新的按原始文档身份隔离的训练/验证/最终测试划分（各 24 个文档族）。最终测试含 24 × 5 = 120 个合成观察案例；模型选择只看验证集。
 
-- 四种合成文档：`report`、`table`、`mixed`、`sparse`。
-- 8–12 条竖直纸条，随机打乱后进行端到端恢复。
-- 传统局部特征（接缝、线性外推、梯度、墨迹轮廓）与 scikit-learn 逻辑回归兼容度模型。
-- Held–Karp 精确全局路径优化；不读取正确顺序作为预测输入。
-- 可复现的观测条件：`clean`、`no_assists`（无边框/纹理）、`scan`（亮度、模糊、逐条亮度）、`edge_loss`（0–2 px 永久边缘丢失）、`vertical_shift`（±3 px 非循环上下错位）。
-- V0.2 改进方法：对局部接缝尝试有限的上下对齐，但只有相对零偏移有足够强的无标签视觉改善时才采用，避免把干净页的随机纹理误判为错位。
-- CLI、Streamlit 演示、自动测试和完整的 CSV/JSON 实验记录。
-
-## V0.2 固定实验
-
-实验按**原始文档身份**（`variant:seed`）切分，而不是按扰动图像切分：训练 36 个文档族、验证 12 个、最终测试 48 个文档族。每个最终测试文档族派生 5 种条件，共 240 个测试案例；训练、验证、测试身份集合自动检查为不相交。
-
-指标含义：
-
-- **文档平均相邻率**：先对每张文档计算正确相邻关系比例，再平均，每张文档权重相同。
-- **汇总相邻率**：把所有案例的正确相邻关系数相加后除以全部相邻关系数，12 条纸带案例权重稍大。
-- **完整恢复率**：整张文档的纸条顺序完全正确的比例。
-
-| 方法 | 文档平均相邻率 | 汇总相邻率 | 完整恢复率 | 平均重建时间 |
+| 方法 | 文档平均相邻恢复率 | 汇总相邻恢复率 | 完整恢复率 | 平均单页耗时 |
 | --- | ---: | ---: | ---: | ---: |
-| V0.1 传统基线 | 73.24% | 73.15% | 40.00% | 0.126 s |
-| V0.1 学习兼容度 | 68.50% | 68.89% | 31.25% | 0.128 s |
-| **V0.2 对齐传统基线** | **78.28%** | **78.33%** | **45.00%** | 0.379 s |
-| V0.2 训练集学习兼容度 | 69.79% | 69.91% | 33.75% | 0.128 s |
+| 传统 V0.2（有限上下对齐） | 80.19% | 80.19% | 47.50% | 0.490 s |
+| 学习 V0.2（干净训练、无对齐） | 73.17% | 73.33% | 38.33% | 0.158 s |
+| **学习 V0.3（增强 + 对齐特征）** | **84.84%** | **84.72%** | **55.00%** | **0.493 s** |
 
-V0.2 对齐方法比 V0.1 传统基线提高 **5.04 个百分点**的文档平均相邻率。在 `vertical_shift` 条件下，从 **50.49%** 升至 **75.70%**（+25.22 个百分点），完整恢复率从 18.75% 升至 43.75%；在干净条件下两者都为 96.73%，没有下降。它对边缘丢失和无辅助线索没有改善，这符合改进只针对上下错位的设计。
+V0.3 相对传统 V0.2 提高 **4.64 个百分点**，相对 V0.2 学习模型提高 **11.67 个百分点**。它并非在所有条件都更好：`clean` 下为 94.04%，低于 V0.2 学习的 95.94%；`edge_loss` 下为 66.99%，也低于 V0.2 学习的 70.35%；`vertical_shift` 下为 74.31%，仍低于传统 V0.2 的 85.84%。真实逐案例数据和失败案例均在 [`artifacts/v0.3/`](artifacts/v0.3/)。
 
-学习模型在此小型合成数据设置中没有稳定超过传统方法；这是保留的真实对比结果，而非删除不利方法。`sparse` 文档的大块空白、`edge_loss` 的不可恢复像素信息，以及无边框/纹理时的起止方向歧义，仍是主要失败来源。
+最大改善来自 `no_assists`：V0.3 的相邻恢复率为 89.98%、完整恢复率为 62.5%，传统 V0.2 的完整恢复率为 0%。验证集在端点权重 0.0 与 0.8 的候选中选择了 **0.0**，减少对合成边框/纹理先验的依赖；详见 [`model_selection.json`](artifacts/v0.3/model_selection.json)。
 
-完整可复现记录在 [`artifacts/v0.2/evaluation.json`](artifacts/v0.2/evaluation.json)、[`artifacts/v0.2/evaluation.csv`](artifacts/v0.2/evaluation.csv) 和 [`artifacts/v0.2/validation.jsonl`](artifacts/v0.2/validation.jsonl)。成功与失败四宫格分别为 [`success-case-report-8-clean-5100.png`](artifacts/v0.2/success-case-report-8-clean-5100.png) 与 [`failure-case-report-10-edge_loss-5101.png`](artifacts/v0.2/failure-case-report-10-edge_loss-5101.png)。
+### 外部页面测试
 
-### 与 V0.1 的关系
+外部测试使用两份 GovInfo 公开美国政府报告，各渲染 5 个真实 PDF 页面，共 10 页。它们**从未进入训练或验证集**；程序对这些完整页进行模拟竖切和打乱，不能把结果称为物理碎纸扫描实验。
 
-V0.1 的原始工件保持在 `artifacts/v0.1/`，没有被覆盖。原有 8 张干净文档的记录是：传统基线 92.42% 相邻率、6/8 完整恢复；学习兼容度 96.59%、7/8 完整恢复。V0.2 的历史复查仍得到同一 V0.1 学习模型 96.59% 文档平均相邻率和 7/8 完整恢复。
+| 方法 | 文档平均相邻恢复率 | 完整恢复率 |
+| --- | ---: | ---: |
+| 传统 V0.2 | 77.99% | 0% |
+| 学习 V0.2 | 83.98% | 0% |
+| **学习 V0.3** | **93.54%** | **80%** |
+
+来源、页码、SHA-256 与许可说明见 [`external_sources.json`](artifacts/v0.3/external/external_sources.json)。两份 PDF 均明确标注为美国政府作品、依据 17 U.S.C. §105 属公共领域：
+
+- [Technical Evaluation for a U.S. CBDC System (OSTP, 2022)](https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf)
+- [Blueprint for an AI Bill of Rights (OSTP, 2022)](https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf)
+
+![外部页面的 V0.3 成功案例](artifacts/v0.3/external-success-us-cbdc-technical-evaluation-2.png)
+
+![外部页面的 V0.3 失败案例](artifacts/v0.3/external-failure-us-cbdc-technical-evaluation-3.png)
+
+## 方法
+
+1. **传统 V0.2**：接缝像素差、线性外推、梯度和边缘轮廓等人工特征；对每对纸条尝试有限、非循环的上下对齐；再用 Held–Karp 动态规划找全局排列。
+2. **学习 V0.2**：以相同局部特征训练 scikit-learn Logistic Regression，但只见过干净合成页且不搜索上下偏移。
+3. **学习 V0.3**：仍是轻量 scikit-learn Logistic Regression；训练文档族轮换覆盖五种观察条件，特征额外包含无标签的对齐收益、偏移大小和有效重叠比例，并以验证集选择端点权重。正确纸条顺序不进入推理过程。
+
+V0.2 学习法落后主要因为训练/测试分布不一致、没有对齐能力，且端点项容易利用合成边框线索。V0.3 解决前两项并在验证集上删除端点先验；永久边缘缺失和弱纹理空白区仍然困难。
 
 ## 安装
 
-需要 Python 3.10+；项目不下载预训练模型、不需要 GPU，也不依赖付费 API。
+需要 Python 3.10+。项目不下载预训练模型、不需要 GPU，也不调用付费 API。
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Linux / WSL2：
-
-```bash
-python3 -m venv .venv
-./.venv/bin/python -m pip install -r requirements.txt
-```
-
 ## 运行
 
-### CLI 演示
+### 命令行演示
 
 ```powershell
 .\.venv\Scripts\python.exe -m shredded_reconstruction.demo `
-  --variant mixed --strips 10 --condition vertical_shift --method learned-v0.2 `
-  --seed 2026 --shuffle-seed 73
+  --variant mixed --strips 10 --condition vertical_shift `
+  --method learned-v0.3 --seed 2026 --shuffle-seed 73
 ```
 
-可选方法：`baseline`、`learned-v0.1`、`learned-v0.2`。结果写入被 Git 忽略的 `outputs/demo/`。
+方法名与实现一一对应：`traditional-v0.1`、`traditional-v0.2`、`learned-v0.1`、`learned-v0.2`、`learned-v0.3`。结果写入 Git 忽略的 `outputs/demo/`。
 
-### Streamlit 演示
+### Streamlit 课堂演示
 
 ```powershell
 .\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-侧边栏可选文档类型、纸条数、扰动条件和重建方法。页面显示原始文档、打乱纸条、重建图、预测顺序与真实顺序的对比指标。
+页面提供一键成功/失败示例、合成随机测试、传统 V0.2 与学习模型对照，以及上传 PNG/JPG 文档页。上传页也会先切条和打乱；真实顺序只用于最终可视化指标，绝不作为预测输入。
 
-课堂演示页按“选择文档 → 打乱纸条 → 双方法重建 → 解释结果”组织，内置一键成功示例和一键失败示例；红框只在预测完成后用于标出错误位置，不会进入算法输入。实际页面截图：
+### 重跑正式评测
 
-![课堂成功示例](artifacts/v0.2/demo-success-page.png)
+```powershell
+.\.venv\Scripts\python.exe scripts\run_v03_evaluation.py --output-dir artifacts\v0.3
+```
 
-![课堂失败示例](artifacts/v0.2/demo-failure-page.png)
+网络可用时脚本下载两份上述公共领域 PDF 到 Git 忽略的 `.tmp/` 缓存；页面与实验工件保存到 `artifacts/v0.3/`，不会覆盖 V0.1/V0.2。
 
-### 测试与完整评测
+## 测试
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe scripts\run_evaluation.py --output-dir artifacts\v0.2
 ```
 
-## 项目结构
+测试覆盖裁切/打乱、无干扰兼容性、扰动可复现性、非循环上下移动、预测排列合法性、文档级数据隔离、全局优化器与 Streamlit 示例页。
+
+## 目录
 
 ```text
 shredded_reconstruction/
-  document.py       合成文档与可开关边框/纹理
-  shred.py          切条、打乱、可复现干扰
-  conditions.py     五种固定观测条件
-  features.py       局部兼容特征与有限上下对齐
+  document.py       合成文档
+  shred.py          切条、打乱和受控扰动
+  features.py       V0.1/V0.2 与 V0.3 局部兼容度特征
   baseline.py       传统兼容度方法
-  learned.py        scikit-learn 学习兼容度
-  optimizer.py      精确全局排序
-  splits.py         文档级 train/validation/test 切分
-  evaluation.py     端到端流程与指标
-scripts/run_evaluation.py  固定评测与工件保存
-tests/                       单元和端到端测试
-artifacts/v0.1/             V0.1 原始记录（保留）
-artifacts/v0.2/             V0.2 正式结果
+  learned.py        scikit-learn 学习兼容度模型
+  optimizer.py      Held–Karp 全局排列优化
+  external.py       外部公开页面下载、渲染和来源记录
+  v03_splits.py     V0.3 文档族训练/验证/最终测试划分
+scripts/run_v03_evaluation.py  固定评测、选参与外部页面测试
+artifacts/v0.1/               保留的历史记录
+artifacts/v0.2/               保留的历史记录
+artifacts/v0.3/               V0.3 CSV、JSON、页面、成功和失败案例
 ```
 
-## 当前限制与下一步
+## 下一步
 
-- 仅处理同一页、无旋转、无重叠的竖直纸条；精确全局优化目前限于 16 条以内。
-- 无边框/无纹理时，首尾方向仍存在全局歧义；边缘丢失时无法要求逐像素恢复。
-- 下一版最有价值的方向是：用训练/验证集设计更可靠的起止纸条证据，或训练对边缘丢失更鲁棒的兼容度模型，并加入真实扫描文档的小规模、人工标注验证。
+- 对真实物理碎纸扫描建立带人工标注的小规模数据集；不要把模拟裁切冒充为物理实验。
+- 针对边缘缺失设计更鲁棒的局部表示，并研究首尾方向不确定时的全局建模。
+- 扩展到旋转、重叠与不规则碎片之前，先保持可复现的外部页面基准。
 
 ## License
 

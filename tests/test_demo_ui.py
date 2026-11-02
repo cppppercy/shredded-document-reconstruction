@@ -23,7 +23,7 @@ def test_streamlit_page_runs_success_and_failure_showcases():
     app.run(timeout=60)
     assert not app.exception
     assert any("碎纸文档自动重建" in heading.value for heading in app.title)
-    assert any("传统方法" in heading.value for heading in app.subheader)
+    assert any("传统 V0.2" in heading.value for heading in app.subheader)
 
     app.radio[0].set_value("失败示例")
     app.button[0].click()

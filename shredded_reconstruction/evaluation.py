@@ -125,3 +125,65 @@ def run_case(
         baseline_seconds,
         learned_seconds,
     )
+
+
+def run_image_case(
+    image: Image.Image,
+    *,
+    strip_count: int,
+    shuffle_seed: int,
+    model: CompatibilityModel | None = None,
+    condition_name: str = "clean",
+    baseline_max_vertical_shift: int = 0,
+    baseline_endpoint_weight: float = 1.0,
+) -> CaseResult:
+    """Run the same pipeline on an uploaded/external full document image.
+
+    The input image is cut and shuffled before either solver runs. The true
+    order stored by ``ShreddedDocument`` is used strictly after prediction for
+    the displayed metrics, exactly as it is for synthetic cases.
+    """
+    condition = observation_condition(condition_name, seed=shuffle_seed)
+    original = image.convert("RGB")
+    shredded = shred_document(
+        original,
+        strip_count=strip_count,
+        shuffle_seed=shuffle_seed,
+        disturbance=condition.disturbance,
+    )
+    started = perf_counter()
+    baseline_order, _ = reconstruct_baseline(
+        shredded.strips,
+        max_vertical_shift=baseline_max_vertical_shift,
+        endpoint_weight=baseline_endpoint_weight,
+    )
+    baseline_seconds = perf_counter() - started
+    baseline_image = compose_strips(shredded.strips, baseline_order)
+    baseline_metrics = order_metrics(baseline_order, shredded.original_indices)
+    learned_order: list[int] | None = None
+    learned_image: Image.Image | None = None
+    learned_metrics: dict[str, float | bool | list[int]] | None = None
+    learned_seconds: float | None = None
+    if model is not None:
+        started = perf_counter()
+        learned_order, _ = model.reconstruct(shredded.strips)
+        learned_seconds = perf_counter() - started
+        learned_image = compose_strips(shredded.strips, learned_order)
+        learned_metrics = order_metrics(learned_order, shredded.original_indices)
+    return CaseResult(
+        -1,
+        "uploaded",
+        strip_count,
+        original,
+        shredded,
+        baseline_order,
+        baseline_image,
+        baseline_metrics,
+        learned_order,
+        learned_image,
+        learned_metrics,
+        condition_name,
+        original,
+        baseline_seconds,
+        learned_seconds,
+    )

@@ -19,6 +19,15 @@ FEATURE_NAMES = (
     "relative_seam_roughness",
 )
 
+# V0.3 keeps the original nine seam descriptors intact and adds only
+# label-free information about the alignment search. It is deliberately a
+# separate feature set so V0.1/V0.2 models remain reproducible.
+V03_FEATURE_NAMES = FEATURE_NAMES + (
+    "alignment_improvement",
+    "absolute_vertical_shift",
+    "overlap_fraction",
+)
+
 
 def _gray(image: Image.Image) -> np.ndarray:
     return np.asarray(image.convert("L"), dtype=np.float32) / 255.0
@@ -96,6 +105,49 @@ def compatibility_features(
     return best if best_score < 0.82 * zero_score else zero
 
 
+def v03_compatibility_features(
+    left: Image.Image,
+    right: Image.Image,
+    band: int = 8,
+    max_vertical_shift: int = 0,
+) -> np.ndarray:
+    """V0.3 seam features with explicit, non-label alignment evidence.
+
+    The first nine values equal ``compatibility_features``. The added values
+    say whether a useful offset was found, how large it was, and how much true
+    row overlap remained. They never use an original strip location or label.
+    """
+    if left.height != right.height:
+        raise ValueError("Strip heights must match")
+    if max_vertical_shift < 0 or max_vertical_shift * 2 + 3 > left.height:
+        raise ValueError("max_vertical_shift is incompatible with strip height")
+    a, b = _gray(left), _gray(right)
+    if a.shape[1] < 2 or b.shape[1] < 2:
+        raise ValueError("Strips must be at least two pixels wide")
+    candidates: list[np.ndarray] = []
+    for shift in range(-max_vertical_shift, max_vertical_shift + 1):
+        if shift >= 0:
+            aligned_a, aligned_b = a[shift:], b[: a.shape[0] - shift]
+        else:
+            aligned_a, aligned_b = a[: a.shape[0] + shift], b[-shift:]
+        candidates.append(_features_for_aligned_arrays(aligned_a, aligned_b, band))
+    zero = candidates[max_vertical_shift]
+    scores = [float(values[2] + values[0] + 0.35 * values[3]) for values in candidates]
+    best_index = int(np.argmin(scores))
+    best = candidates[best_index]
+    zero_score = scores[max_vertical_shift]
+    best_score = scores[best_index]
+    accepted = best_score < 0.82 * zero_score
+    selected = best if accepted else zero
+    selected_shift = best_index - max_vertical_shift if accepted else 0
+    improvement = max(0.0, (zero_score - (best_score if accepted else zero_score)) / (zero_score + 1e-8))
+    shift_scale = max(1, max_vertical_shift)
+    overlap = (left.height - abs(selected_shift)) / left.height
+    return np.concatenate(
+        [selected, np.asarray((improvement, abs(selected_shift) / shift_scale, overlap), dtype=np.float64)]
+    )
+
+
 def pairwise_feature_tensor(strips: Sequence[Image.Image], max_vertical_shift: int = 0) -> np.ndarray:
     count = len(strips)
     result = np.zeros((count, count, len(FEATURE_NAMES)), dtype=np.float64)
@@ -103,6 +155,19 @@ def pairwise_feature_tensor(strips: Sequence[Image.Image], max_vertical_shift: i
         for right in range(count):
             if left != right:
                 result[left, right] = compatibility_features(
+                    strips[left], strips[right], max_vertical_shift=max_vertical_shift
+                )
+    return result
+
+
+def pairwise_v03_feature_tensor(strips: Sequence[Image.Image], max_vertical_shift: int = 0) -> np.ndarray:
+    """Pairwise tensor for the V0.3 learned model only."""
+    count = len(strips)
+    result = np.zeros((count, count, len(V03_FEATURE_NAMES)), dtype=np.float64)
+    for left in range(count):
+        for right in range(count):
+            if left != right:
+                result[left, right] = v03_compatibility_features(
                     strips[left], strips[right], max_vertical_shift=max_vertical_shift
                 )
     return result

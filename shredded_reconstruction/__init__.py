@@ -3,7 +3,7 @@
 from .baseline import reconstruct_baseline
 from .document import DOCUMENT_VARIANTS, generate_document
 from .evaluation import order_metrics
-from .learned import CompatibilityModel, train_compatibility_model
+from .learned import CompatibilityModel, train_compatibility_model, train_v03_compatibility_model
 from .shred import ShreddedDocument, compose_strips, shred_document
 
 __all__ = [
@@ -16,6 +16,7 @@ __all__ = [
     "reconstruct_baseline",
     "shred_document",
     "train_compatibility_model",
+    "train_v03_compatibility_model",
 ]
 
 __version__ = "0.2.0"
