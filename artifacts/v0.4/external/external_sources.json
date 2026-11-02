@@ -1,0 +1,106 @@
+{
+  "sources": [
+    {
+      "source_id": "us-cbdc-technical-evaluation",
+      "title": "Technical Evaluation for a U.S. CBDC System (OSTP, 2022)",
+      "pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193426/pdf/GOVPUB-PREX23-PURL-gpo193426.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "pages_zero_based": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "source_id": "ai-bill-of-rights",
+      "title": "Blueprint for an AI Bill of Rights (OSTP, 2022)",
+      "pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "source_page_url": "https://www.govinfo.gov/content/pkg/GOVPUB-PREX23-PURL-gpo193638/pdf/GOVPUB-PREX23-PURL-gpo193638.pdf",
+      "license_note": "The PDF states it is a work of the U.S. Government in the public domain (17 U.S.C. \u00a7105).",
+      "pages_zero_based": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "page_id": "usgs-landstat-economic-valuation:3",
+      "source_id": "usgs-landstat-economic-valuation",
+      "title": "USGS Open-File Report 2019-1112: Economic valuation of Landsat imagery",
+      "source_pdf_url": "https://pubs.usgs.gov/of/2019/1112/ofr20191112.pdf",
+      "source_page_url": "https://pubs.usgs.gov/publication/ofr20191112",
+      "license_note": "USGS states that its published-report PDFs are public domain; this report notes any exceptions within the text.",
+      "page_number_one_based": 3,
+      "rendered_file": "pages\\usgs-landstat-economic-valuation-page-03.png",
+      "pdf_sha256": "45e53b3b26e9e606cc6cb2652c207d5f301a21d8c8074e4f052091be8109abd4",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "usgs-landstat-economic-valuation:9",
+      "source_id": "usgs-landstat-economic-valuation",
+      "title": "USGS Open-File Report 2019-1112: Economic valuation of Landsat imagery",
+      "source_pdf_url": "https://pubs.usgs.gov/of/2019/1112/ofr20191112.pdf",
+      "source_page_url": "https://pubs.usgs.gov/publication/ofr20191112",
+      "license_note": "USGS states that its published-report PDFs are public domain; this report notes any exceptions within the text.",
+      "page_number_one_based": 9,
+      "rendered_file": "pages\\usgs-landstat-economic-valuation-page-09.png",
+      "pdf_sha256": "45e53b3b26e9e606cc6cb2652c207d5f301a21d8c8074e4f052091be8109abd4",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "nist-digital-identity-guidelines:6",
+      "source_id": "nist-digital-identity-guidelines",
+      "title": "NIST SP 800-63A-4: Digital Identity Guidelines",
+      "source_pdf_url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63a-4.pdf",
+      "source_page_url": "https://csrc.nist.gov/pubs/sp/800/63/a/4/final",
+      "license_note": "NIST states this publication is not subject to copyright in the United States (17 U.S.C. 105).",
+      "page_number_one_based": 6,
+      "rendered_file": "pages\\nist-digital-identity-guidelines-page-06.png",
+      "pdf_sha256": "f83654182f0b012f17f6901e6d03e12ef2ba422b341aee875e837094f23e9ad3",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "nist-digital-identity-guidelines:16",
+      "source_id": "nist-digital-identity-guidelines",
+      "title": "NIST SP 800-63A-4: Digital Identity Guidelines",
+      "source_pdf_url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63a-4.pdf",
+      "source_page_url": "https://csrc.nist.gov/pubs/sp/800/63/a/4/final",
+      "license_note": "NIST states this publication is not subject to copyright in the United States (17 U.S.C. 105).",
+      "page_number_one_based": 16,
+      "rendered_file": "pages\\nist-digital-identity-guidelines-page-16.png",
+      "pdf_sha256": "f83654182f0b012f17f6901e6d03e12ef2ba422b341aee875e837094f23e9ad3",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "gpo-annual-report-2023:4",
+      "source_id": "gpo-annual-report-2023",
+      "title": "U.S. Government Publishing Office Annual Report 2023",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da/pdf/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da.pdf",
+      "source_page_url": "https://www.govinfo.gov/app/details/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da",
+      "license_note": "The GovInfo record states this U.S. Government work is not subject to copyright under 17 U.S.C. 105.",
+      "page_number_one_based": 4,
+      "rendered_file": "pages\\gpo-annual-report-2023-page-04.png",
+      "pdf_sha256": "19490bdb63fc9eedd6c5c6e5c53b528572f92a39a12526abcde8267e86e6f007",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    },
+    {
+      "page_id": "gpo-annual-report-2023:11",
+      "source_id": "gpo-annual-report-2023",
+      "title": "U.S. Government Publishing Office Annual Report 2023",
+      "source_pdf_url": "https://www.govinfo.gov/content/pkg/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da/pdf/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da.pdf",
+      "source_page_url": "https://www.govinfo.gov/app/details/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da",
+      "license_note": "The GovInfo record states this U.S. Government work is not subject to copyright under 17 U.S.C. 105.",
+      "page_number_one_based": 11,
+      "rendered_file": "pages\\gpo-annual-report-2023-page-11.png",
+      "pdf_sha256": "19490bdb63fc9eedd6c5c6e5c53b528572f92a39a12526abcde8267e86e6f007",
+      "usage": "external full page, then simulated vertical cutting and shuffling; never model training"
+    }
+  ]
+}

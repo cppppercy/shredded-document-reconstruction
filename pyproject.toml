@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "shredded-document-reconstruction"
-version = "0.3.0"
+version = "0.4.0"
 description = "Reconstruct vertically shredded synthetic and external document pages with learned compatibility."
 readme = "README.md"
 requires-python = ">=3.10"

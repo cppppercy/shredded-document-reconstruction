@@ -8,6 +8,36 @@
 
 ![V0.3 自动选择的合成成功与失败案例](artifacts/v0.3/selected-cases-grid.png)
 
+## V0.4 最终确认与课堂展示材料
+
+V0.4 不再把 V0.3 已公布的最终集用于调参，而是创建了新的、按原始文档身份隔离的训练（24 个文档族）/验证（12 个）/确认（24 个）划分。确认集有 24 × 5 = **120** 个案例；五个对照方案在运行确认集之前固定。
+
+| V0.4 独立确认（按文档平均相邻恢复率） | 相邻恢复率 | 完整恢复率 |
+| --- | ---: | ---: |
+| 传统 V0.2（含端点辅助项） | **78.54%** | **47.50%** |
+| 传统 V0.2（去除端点辅助项） | 72.96% | 1.67% |
+| 学习 V0.3（不做干扰增强） | 77.39% | 48.33% |
+| 学习 V0.3（无上下对齐特征/搜索） | 76.28% | 40.00% |
+| 学习 V0.3（完整配置） | 77.78% | 45.00% |
+
+完整学习配置相对“无增强”提高 **0.39** 个百分点，相对“无上下对齐”提高 **1.50** 个百分点；不过它在这批新的文档族上仍略低于传统 V0.2。这个结果说明 V0.3 的干扰训练和对齐特征确有小幅贡献，但当前轻量特征模型并不稳定地胜过传统规则，项目保留该负结果。
+
+![V0.4 独立确认消融对照](artifacts/v0.4/ablation-confirmation.png)
+
+### 新外部页面测试
+
+V0.4 新增三份从未进入训练的公开来源：USGS Open-File Report、NIST SP 800-63A-4 和 GPO Annual Report；每份渲染两页，共 6 页。它们都是完整公开页面的**模拟竖直裁切**，不是物理碎纸扫描。学习 V0.3 得到 82.76% 的文档平均相邻恢复率、1/6 完整恢复；传统 V0.2 为 77.22%、0/6 完整恢复。具体来源、许可、页码、SHA-256 与逐页结果均保存在 [`artifacts/v0.4/`](artifacts/v0.4/)。
+
+- [USGS Open-File Report 2019-1112](https://pubs.usgs.gov/of/2019/1112/ofr20191112.pdf)（USGS 已发布报告 PDF 可公开使用，报告内说明可能的例外项）
+- [NIST SP 800-63A-4](https://csrc.nist.gov/pubs/sp/800/63/a/4/final)（NIST 声明该出版物在美国不受版权保护）
+- [GPO Annual Report 2023](https://www.govinfo.gov/app/details/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da)（GovInfo 说明其为 17 U.S.C. §105 下不受版权保护的美国政府作品）
+
+![V0.4 新外部来源成功案例](artifacts/v0.4/success-v04-usgs-landstat-economic-valuation-10-external_page_simulated_cut-usgs-landstat-economic-valuation-9.png)
+
+![V0.4 新外部来源失败案例](artifacts/v0.4/failure-v04-gpo-annual-report-2023-10-external_page_simulated_cut-gpo-annual-report-2023-4.png)
+
+课堂用 5 页内容草案与中文讲稿见 [`artifacts/v0.4/presentation_outline.md`](artifacts/v0.4/presentation_outline.md)。
+
 ## V0.3 结果摘要
 
 V0.3 使用新的按原始文档身份隔离的训练/验证/最终测试划分（各 24 个文档族）。最终测试含 24 × 5 = 120 个合成观察案例；模型选择只看验证集。
@@ -85,6 +115,14 @@ python -m venv .venv
 ```
 
 网络可用时脚本下载两份上述公共领域 PDF 到 Git 忽略的 `.tmp/` 缓存；页面与实验工件保存到 `artifacts/v0.3/`，不会覆盖 V0.1/V0.2。
+
+### 运行 V0.4 独立确认与外部验证
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_v04_ablation.py --output-dir artifacts\v0.4
+```
+
+该脚本会以新文档族重新训练固定的消融配置，运行 120 个确认案例，并下载三个公开 PDF 缓存到 Git 忽略的 `.tmp/`；正式 CSV、JSON、图表、成功/失败图与来源说明保存到 `artifacts/v0.4/`。
 
 ## 测试
 

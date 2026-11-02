@@ -46,6 +46,37 @@ EXTERNAL_SOURCES = (
 )
 
 
+# New V0.4 sources deliberately differ from the two V0.3 OSTP reports.  Each
+# record retains a stable landing page and a direct file URL so the experiment
+# remains reproducible.  These pages are *only* simulatedly cut for testing.
+V04_EXTERNAL_SOURCES = (
+    ExternalSource(
+        "usgs-landstat-economic-valuation",
+        "USGS Open-File Report 2019-1112: Economic valuation of Landsat imagery",
+        "https://pubs.usgs.gov/of/2019/1112/ofr20191112.pdf",
+        "https://pubs.usgs.gov/publication/ofr20191112",
+        "USGS states that its published-report PDFs are public domain; this report notes any exceptions within the text.",
+        (2, 8),
+    ),
+    ExternalSource(
+        "nist-digital-identity-guidelines",
+        "NIST SP 800-63A-4: Digital Identity Guidelines",
+        "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63a-4.pdf",
+        "https://csrc.nist.gov/pubs/sp/800/63/a/4/final",
+        "NIST states this publication is not subject to copyright in the United States (17 U.S.C. 105).",
+        (5, 15),
+    ),
+    ExternalSource(
+        "gpo-annual-report-2023",
+        "U.S. Government Publishing Office Annual Report 2023",
+        "https://www.govinfo.gov/content/pkg/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da/pdf/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da.pdf",
+        "https://www.govinfo.gov/app/details/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da",
+        "The GovInfo record states this U.S. Government work is not subject to copyright under 17 U.S.C. 105.",
+        (3, 10),
+    ),
+)
+
+
 def _download(url: str, destination: Path) -> str:
     request = Request(url, headers={"User-Agent": "shredded-document-reconstruction/0.3 educational project"})
     with urlopen(request, timeout=90) as response:
@@ -54,8 +85,12 @@ def _download(url: str, destination: Path) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def prepare_external_pages(output_dir: Path, cache_dir: Path) -> list[dict[str, object]]:
-    """Render ten external pages and return their provenance records.
+def prepare_pages_for_sources(
+    output_dir: Path,
+    cache_dir: Path,
+    sources: tuple[ExternalSource, ...],
+) -> list[dict[str, object]]:
+    """Render declared external pages and return their provenance records.
 
     These are external pages that are *simulatedly cut* later. They are not
     claimed to be photographs of physically shredded documents and never enter
@@ -65,7 +100,7 @@ def prepare_external_pages(output_dir: Path, cache_dir: Path) -> list[dict[str, 
     pages_dir.mkdir(parents=True, exist_ok=True)
     cache_dir.mkdir(parents=True, exist_ok=True)
     records: list[dict[str, object]] = []
-    for source in EXTERNAL_SOURCES:
+    for source in sources:
         pdf_path = cache_dir / f"{source.source_id}.pdf"
         sha256 = _download(source.pdf_url, pdf_path) if not pdf_path.exists() else hashlib.sha256(pdf_path.read_bytes()).hexdigest()
         document = fitz.open(pdf_path)
@@ -101,3 +136,8 @@ def prepare_external_pages(output_dir: Path, cache_dir: Path) -> list[dict[str, 
         encoding="utf-8",
     )
     return records
+
+
+def prepare_external_pages(output_dir: Path, cache_dir: Path) -> list[dict[str, object]]:
+    """Render the ten V0.3 external pages (kept unchanged for reproducibility)."""
+    return prepare_pages_for_sources(output_dir, cache_dir, EXTERNAL_SOURCES)

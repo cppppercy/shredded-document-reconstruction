@@ -1,4 +1,4 @@
-"""Classroom-oriented Streamlit demonstration for the V0.3 prototype."""
+"""Classroom-oriented Streamlit demonstration for the V0.4 prototype."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from shredded_reconstruction.visualize import reconstruction_diagnostic, shuffle
 
 
 ROOT = Path(__file__).resolve().parent
-st.set_page_config(page_title="碎纸文档自动重建 | V0.3", layout="wide")
+st.set_page_config(page_title="碎纸文档自动重建 | V0.4", layout="wide")
 
 SHOWCASES = {
     "成功示例": {"seed": 5100, "variant": "report", "strip_count": 8, "condition": "clean", "shuffle_seed": 86713},
@@ -107,6 +107,10 @@ def _result_chart() -> None:
     if rows:
         st.bar_chart(rows, horizontal=True)
         st.caption("固定 V0.3 最终测试的文档平均相邻恢复率；不是本页临时示例的数字。")
+    v04_chart = ROOT / "artifacts" / "v0.4" / "ablation-confirmation.png"
+    if v04_chart.exists():
+        st.subheader("V0.4 独立确认：关键对照实验")
+        st.image(str(v04_chart), caption="新文档族上的固定消融：完整学习配置不保证超过传统方法；图中数字来自实际确认运行。", width="stretch")
 
 
 st.title("碎纸文档自动重建：从打乱纸条到全局拼接")
