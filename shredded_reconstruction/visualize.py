@@ -9,6 +9,56 @@ from PIL import Image, ImageDraw, ImageOps
 from .document import _font
 
 
+def fit_for_display(image: Image.Image, max_size: tuple[int, int]) -> Image.Image:
+    """Return a proportional, display-only copy that never crops or enlarges.
+
+    The reconstruction pipeline continues to receive the original images.  This
+    helper is deliberately for Streamlit previews and report figures only.
+    """
+    max_width, max_height = max_size
+    if max_width <= 0 or max_height <= 0:
+        raise ValueError("display dimensions must be positive")
+    original = image.convert("RGB")
+    target = (min(original.width, max_width), min(original.height, max_height))
+    return ImageOps.contain(original, target, Image.Resampling.LANCZOS)
+
+
+def strip_workbench_montage(
+    strips: Sequence[Image.Image],
+    *,
+    show_input_positions: bool = False,
+    gap: int = 8,
+) -> Image.Image:
+    """Visual-only separated strips for the interactive workbench.
+
+    Positions, when requested, refer only to the current shuffled input order.
+    They do not reveal the original left-to-right labels stored for evaluation.
+    """
+    if not strips:
+        raise ValueError("at least one strip is required")
+    if gap < 1:
+        raise ValueError("gap must be positive")
+    padding = 10
+    label_height = 30 if show_input_positions else 0
+    width = padding * 2 + sum(strip.width for strip in strips) + gap * (len(strips) - 1)
+    height = padding * 2 + label_height + max(strip.height for strip in strips)
+    output = Image.new("RGB", (width, height), (240, 244, 248))
+    draw = ImageDraw.Draw(output)
+    x = padding
+    for position, strip in enumerate(strips, start=1):
+        visible = strip.convert("RGB")
+        y = padding + label_height
+        output.paste(visible, (x, y))
+        draw.rectangle((x - 1, y - 1, x + visible.width, y + visible.height), outline=(153, 169, 185), width=1)
+        if show_input_positions:
+            label = f"输入 {position}"
+            text_box = draw.textbbox((0, 0), label, font=_font(12, bold=True))
+            text_x = x + max(0, (visible.width - (text_box[2] - text_box[0])) // 2)
+            draw.text((text_x, padding + 6), label, fill=(45, 64, 84), font=_font(12, bold=True))
+        x += visible.width + gap
+    return output
+
+
 def shuffled_montage(strips: Sequence[Image.Image]) -> Image.Image:
     label_height = 38
     width = sum(strip.width for strip in strips)

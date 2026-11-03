@@ -19,6 +19,7 @@ SOURCE_KEY = "workflow_source_key"
 CUT_KEY = "workflow_cut"
 SHUFFLED_KEY = "workflow_shuffled"
 RESULTS_KEY = "workflow_results"
+VIEW_KEY = "workflow_view"
 
 
 def clear_after_source_change(state: MutableMapping[str, object], source_key: str) -> bool:
@@ -39,11 +40,13 @@ def clear_after_cut(state: MutableMapping[str, object]) -> None:
     state.pop(CUT_KEY, None)
     state.pop(SHUFFLED_KEY, None)
     state.pop(RESULTS_KEY, None)
+    state.pop(VIEW_KEY, None)
 
 
 def clear_after_shuffle(state: MutableMapping[str, object]) -> None:
     """Discard predictions because their input permutation changed."""
     state.pop(RESULTS_KEY, None)
+    state.pop(VIEW_KEY, None)
 
 
 def prepare_cut(image: Image.Image, strip_count: int) -> ShreddedDocument:
