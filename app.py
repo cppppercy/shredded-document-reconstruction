@@ -40,6 +40,7 @@ INTERACTIVE_MODEL_METADATA = INTERACTIVE_MODEL.with_name("metadata.json")
 VIEW_WIDGET_KEY = "workbench_view_choice"
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 MAX_UPLOAD_PIXELS = 24_000_000
+WORKFLOW_REVISION_KEY = "workflow_revision"
 
 # Archive metadata keeps full titles; the chooser uses short projector-friendly labels.
 DISPLAY_TITLES = {
@@ -85,9 +86,17 @@ def _load_demo_image(filename: str) -> Image.Image:
         return image.convert("RGB")
 
 
+def _encoded_preview(image: Image.Image, max_size: tuple[int, int]) -> tuple[bytes, int]:
+    """Make a small JPEG once for browser display, never for reconstruction."""
+    preview = fit_for_display(image, max_size)
+    output = io.BytesIO()
+    preview.save(output, format="JPEG", quality=84, optimize=True)
+    return output.getvalue(), preview.width
+
+
 @st.cache_data
-def _demo_preview(filename: str, max_size: tuple[int, int]) -> Image.Image:
-    return fit_for_display(_load_demo_image(filename), max_size)
+def _demo_preview(filename: str, max_size: tuple[int, int]) -> tuple[bytes, int]:
+    return _encoded_preview(_load_demo_image(filename), max_size)
 
 
 @st.cache_data
@@ -97,6 +106,19 @@ def _uploaded_image(payload: bytes) -> Image.Image:
             raise ValueError(f"Image exceeds {MAX_UPLOAD_PIXELS:,} pixels")
         image.load()
         return image.convert("RGB")
+
+
+@st.cache_data
+def _uploaded_preview(payload: bytes, max_size: tuple[int, int]) -> tuple[bytes, int]:
+    """Avoid repeating a 12+ MP resize/PNG encode on ordinary UI reruns."""
+    return _encoded_preview(_uploaded_image(payload), max_size)
+
+
+@st.cache_data
+def _case_preview(category: str) -> tuple[bytes, int]:
+    asset = ROOT / "artifacts" / "final" / "cases" / f"{category}.png"
+    with Image.open(asset) as image:
+        return _encoded_preview(image.convert("RGB"), (1100, 640))
 
 
 @st.cache_data
@@ -124,8 +146,30 @@ def _show_preview(
 
 
 def _show_demo_preview(filename: str, *, caption: str | None = None, max_size: tuple[int, int]) -> None:
-    preview = _demo_preview(filename, max_size)
-    st.image(preview, caption=caption, width=preview.width)
+    preview, width = _demo_preview(filename, max_size)
+    st.image(preview, caption=caption, width=width)
+
+
+def _show_uploaded_preview(payload: bytes, *, caption: str | None = None, max_size: tuple[int, int]) -> None:
+    preview, width = _uploaded_preview(payload, max_size)
+    st.image(preview, caption=caption, width=width)
+
+
+def _advance_workflow_revision() -> None:
+    st.session_state[WORKFLOW_REVISION_KEY] = int(st.session_state.get(WORKFLOW_REVISION_KEY, 0)) + 1
+
+
+def _workflow_token(*, source_key: str, cut, shuffled, results) -> str:
+    """Return a stable completion token for browser-level acceptance tests."""
+    stage = "results" if results is not None else "shuffled" if shuffled is not None else "cut" if cut is not None else "source"
+    revision = int(st.session_state.get(WORKFLOW_REVISION_KEY, 0))
+    labels = {
+        "source": "已选择文档",
+        "cut": "已切成纸条",
+        "shuffled": "已随机打乱",
+        "results": "已完成重建",
+    }
+    return f"当前步骤：{labels[stage]}（run-{revision}; stage={stage}）"
 
 
 def _png_bytes(image: Image.Image) -> bytes:
@@ -290,8 +334,11 @@ def _analysis() -> None:
     )
     asset = ROOT / "artifacts" / "final" / "cases" / f"{category}.png"
     if asset.exists():
-        with Image.open(asset) as image:
-            _show_preview(image.convert("RGB"), max_size=(1100, 640))
+        # Keep the first analysis render to the research tables.  The composed
+        # case image is useful, but decoding and sending it is optional.
+        if st.checkbox("显示这个案例图", key=f"show-case-{category}"):
+            preview, width = _case_preview(category)
+            st.image(preview, width=width)
     else:
         st.warning("案例图尚未生成；请运行 scripts/prepare_final_analysis.py。")
 
@@ -314,6 +361,7 @@ main_tab = st.container()
 with main_tab:
     mode = st.radio("文档来源", ("演示文档", "上传图片"), horizontal=True)
     source_image: Image.Image | None = None
+    uploaded_payload: bytes | None = None
     source_key, source_title, selected = "no-source", "", None
     if mode == "演示文档":
         selected = _gallery(load_demo_manifest())
@@ -323,18 +371,19 @@ with main_tab:
     else:
         uploaded = st.file_uploader("上传 PNG/JPG 文档图片", type=("png", "jpg", "jpeg"))
         if uploaded is not None:
-            payload = uploaded.getvalue()
-            if len(payload) > MAX_UPLOAD_BYTES:
+            uploaded_payload = uploaded.getvalue()
+            if len(uploaded_payload) > MAX_UPLOAD_BYTES:
                 st.error("上传图片超过 20 MB 限制，请先压缩或缩小图片后重试。")
             else:
                 try:
-                    source_image = _uploaded_image(payload)
-                    source_key, source_title = f"upload:{hashlib.sha256(payload).hexdigest()}", uploaded.name
+                    source_image = _uploaded_image(uploaded_payload)
+                    source_key, source_title = f"upload:{hashlib.sha256(uploaded_payload).hexdigest()}", uploaded.name
                 except (OSError, ValueError) as error:
                     st.error(f"无法读取这张图片：{error}")
 
     source_changed = clear_after_source_change(st.session_state, source_key)
     if source_changed:
+        _advance_workflow_revision()
         st.session_state.pop(VIEW_WIDGET_KEY, None)
     cut = st.session_state.get(CUT_KEY)
     shuffled = st.session_state.get(SHUFFLED_KEY)
@@ -363,6 +412,7 @@ with main_tab:
     if cut_clicked and source_image is not None:
         st.session_state[CUT_KEY] = prepare_cut(source_image, strip_count)
         clear_after_shuffle(st.session_state)
+        _advance_workflow_revision()
         _set_view("裁切结果")
         st.rerun()
     if shuffle_clicked and cut is not None:
@@ -370,6 +420,7 @@ with main_tab:
         prior_indices = previous.original_indices if previous is not None else None
         st.session_state[SHUFFLED_KEY] = shuffle_cut_document(cut, previous_original_indices=prior_indices)
         clear_after_shuffle(st.session_state)
+        _advance_workflow_revision()
         _set_view("打乱结果")
         st.rerun()
     if reconstruct_clicked and shuffled is not None:
@@ -378,6 +429,7 @@ with main_tab:
             st.write("学习匹配正在计算…")
             st.session_state[RESULTS_KEY] = predict_both_methods(shuffled, get_learning_model())
             status.update(label="重建完成", state="complete", expanded=False)
+        _advance_workflow_revision()
         _set_view("恢复结果")
         st.rerun()
 
@@ -403,6 +455,10 @@ with main_tab:
         if chosen_view == "文档预览":
             if source_image is None:
                 st.info("请选择演示文档，或上传一张 PNG/JPG 图片。")
+            elif selected is not None:
+                _show_demo_preview(str(selected["filename"]), caption=f"文档预览：{source_title}", max_size=(700, 430))
+            elif uploaded_payload is not None:
+                _show_uploaded_preview(uploaded_payload, caption=f"文档预览：{source_title}", max_size=(700, 430))
             else:
                 _show_preview(source_image, caption=f"文档预览：{source_title}", max_size=(700, 430))
         elif chosen_view == "裁切结果" and cut is not None:
@@ -424,3 +480,5 @@ with main_tab:
                     _show_result("规则匹配", shuffled, results["rule"], mark_errors)
                 with right:
                     _show_result("学习匹配", shuffled, results["learned"], mark_errors)
+
+    st.caption(_workflow_token(source_key=source_key, cut=cut, shuffled=shuffled, results=results))

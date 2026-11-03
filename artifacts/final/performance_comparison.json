@@ -3,21 +3,49 @@
   "before_commit": "b4beb2d",
   "after_commit": "delivery remediation implementation",
   "seconds": {
-    "first_open": {"before": 4.3519678, "after": 2.8888965},
-    "open_gallery": {"before": 0.5524693, "after": 0.1972562},
-    "select_other_demo": {"before": 0.3945485, "after": 0.0562683},
-    "demo_to_upload": {"before": 0.2992353, "after": 0.0677572},
-    "upload_to_demo": {"before": 0.4529849, "after": 0.0460034},
-    "switch_analysis": {"before": null, "after": 0.0739037},
-    "back_to_workbench": {"before": null, "after": 0.0454105},
-    "cut": {"before": null, "after": 0.0563522},
-    "shuffle": {"before": null, "after": 0.0638636},
-    "first_reconstruction": {"before": null, "after": 0.5974419},
-    "result_view_switch": {"before": null, "after": 0.0680455}
+    "first_open": {"before": 4.3519678, "after": 1.792103},
+    "open_gallery": {"before": 0.5524693, "after": 0.1237649},
+    "select_other_demo": {"before": 0.3945485, "after": 0.0410286},
+    "demo_to_upload": {"before": 0.2992353, "after": 0.0439878},
+    "upload_to_demo": {"before": 0.4529849, "after": 0.0225428},
+    "switch_analysis": {"before": null, "after": 0.0280601},
+    "back_to_workbench": {"before": null, "after": 0.0344592},
+    "cut": {"before": null, "after": 0.0360043},
+    "shuffle": {"before": null, "after": 0.0400315},
+    "first_reconstruction": {"before": null, "after": 0.6981391},
+    "result_view_switch": {"before": null, "after": 0.0930764}
+  },
+  "chrome_1366_loopback_seconds": {
+    "scope": "Installed Chrome at 1366x768 against a local Streamlit server. The sealed check waits for an explicit workflow revision, decoded images, and a short stable-DOM interval.",
+    "legacy_check_before": {
+      "cold_open": 10.3623686,
+      "warm_open": 5.1706688,
+      "large_upload": 5.8834379,
+      "analysis_switch": 7.5417313,
+      "first_reconstruction": 5.0330936,
+      "repeat_reconstruction": null
+    },
+    "sealed_check_after": {
+      "cold_open": 8.8084194,
+      "warm_open": 4.1857774,
+      "large_upload": 5.0161855,
+      "upload_to_demo": 0.3085199,
+      "cut": 0.479464,
+      "shuffle": 0.5285043,
+      "first_reconstruction": 1.7211309,
+      "repeat_reconstruction": 1.5707639,
+      "analysis_switch": 4.1741892
+    },
+    "interpretation": [
+      "The legacy check ended repeat reconstruction after a widget-count condition that was already true; its 0.06-second value was invalid and is intentionally not used as a before value.",
+      "The legacy first-reconstruction measurement also included a fixed extra wait, so only the direction of the cold, warm, upload, and analysis improvements is suitable for comparison.",
+      "The sealed check measures full browser-visible completion. Cold open and analysis remain above one second because Streamlit still initializes and transfers page resources; this is recorded as a remaining limitation."
+    ]
   },
   "notes": [
     "The before version did not expose a separate analysis-page radio or a stable result-view control, so those fields have no directly comparable before value.",
     "A real Chrome visual run was also performed for layout screenshots; AppTest numbers are reported only as server-side rerun timings.",
-    "First reconstruction intentionally remains above one second because it performs two genuine compatibility/global-order computations. Ordinary source and view changes are below 0.5 seconds in this measurement."
+    "First reconstruction intentionally remains above one second because it performs two genuine compatibility/global-order computations. Ordinary source and view changes are below 0.5 seconds in this measurement.",
+    "The final sealed Chrome values are stored separately because browser rendering, image transfer, and Streamlit frontend work are not represented by AppTest server-side timings."
   ]
 }

@@ -44,6 +44,7 @@ def test_streamlit_page_starts_idle_then_allows_cut_and_shuffle():
     app = AppTest.from_file(str(ROOT / "app.py"))
     app.run(timeout=60)
     assert not app.exception
+    assert any("run-1" in item.value for item in app.caption)
     assert any("碎纸文档自动重建" in heading.value for heading in app.title)
     assert button(app, "shuffle_document").disabled
     assert button(app, "reconstruct_document").disabled
@@ -54,12 +55,14 @@ def test_streamlit_page_starts_idle_then_allows_cut_and_shuffle():
     assert not app.exception
     assert "裁切结果" in app.radio(key="workbench_view_choice").options
     assert not button(app, "shuffle_document").disabled
+    assert any("run-2" in item.value for item in app.caption)
 
     button(app, "shuffle_document").click()
     app.run(timeout=60)
     assert not app.exception
     assert "打乱结果" in app.radio(key="workbench_view_choice").options
     assert not button(app, "reconstruct_document").disabled
+    assert any("run-3" in item.value for item in app.caption)
 
     # Selecting a different gallery card is a genuine source replacement, so
     # stale cut/shuffle state must not survive it.

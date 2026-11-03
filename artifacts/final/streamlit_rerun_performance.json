@@ -1,16 +1,16 @@
 {
   "scope": "server-side Streamlit rerun time; excludes browser paint",
   "seconds": {
-    "first_open": 2.888896499999646,
-    "open_gallery": 0.19725620000008348,
-    "select_other_demo": 0.056268300000738236,
-    "demo_to_upload": 0.06775720000041474,
-    "upload_to_demo": 0.04600339999979042,
-    "switch_analysis": 0.07390370000030089,
-    "back_to_workbench": 0.045410499999889,
-    "cut": 0.056352200000219455,
-    "shuffle": 0.06386359999942215,
-    "first_reconstruction": 0.5974419000003763,
-    "result_view_switch": 0.06804550000015297
+    "first_open": 1.79210299999977,
+    "open_gallery": 0.12376489999951445,
+    "select_other_demo": 0.041028600000572624,
+    "demo_to_upload": 0.04398779999974067,
+    "upload_to_demo": 0.022542799999428098,
+    "switch_analysis": 0.028060100001312094,
+    "back_to_workbench": 0.034459200000128476,
+    "cut": 0.03600430000005872,
+    "shuffle": 0.040031499998804065,
+    "first_reconstruction": 0.6981391000008443,
+    "result_view_switch": 0.0930763999986084
   }
 }
