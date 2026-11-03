@@ -8,7 +8,10 @@ from shredded_reconstruction.research_analysis import (
     comparison_table,
     family_bootstrap_interval,
     load_confirmation,
+    validate_final_case_manifest,
 )
+from shredded_reconstruction.model_artifact import TRAINING_SPLIT, validate_model_metadata
+from shredded_reconstruction.v04_splits import V04_TRAIN_DOCUMENTS
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,6 +42,9 @@ def test_interactive_model_metadata_matches_the_serialized_model() -> None:
     assert metadata["feature_version"] == model.feature_version == "v0.3"
     assert metadata["max_vertical_shift"] == model.max_vertical_shift == 3
     assert metadata["training_document_ids"] == list(model.training_document_ids)
+    assert metadata["training_split"] == TRAINING_SPLIT
+    assert {f"{variant}:{seed}" for seed, variant, _ in V04_TRAIN_DOCUMENTS} == set(model.training_document_ids)
+    validate_model_metadata(model, metadata)
 
 
 def test_bootstrap_uses_original_document_families_not_120_observations() -> None:
@@ -46,3 +52,10 @@ def test_bootstrap_uses_original_document_families_not_120_observations() -> Non
     interval = family_bootstrap_interval(rows, draws=100)
     assert set(interval) == {"rule", "learned", "delta"}
     assert interval["delta"][0] < interval["delta"][1]
+
+
+def test_final_case_manifest_is_tied_to_frozen_final_audit() -> None:
+    validate_final_case_manifest(
+        ROOT / "artifacts" / "final" / "cases" / "manifest.json",
+        ROOT / "artifacts" / "final" / "independent_evaluation.json",
+    )

@@ -8,6 +8,7 @@ and prevents its charts from being mistaken for fresh interactive results.
 from __future__ import annotations
 
 from collections import defaultdict
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -41,6 +42,40 @@ def load_confirmation(path: Path) -> list[dict[str, Any]]:
     if expected is None or len(rows) != int(expected):
         raise ValueError("experiment row count does not match its protocol")
     return rows
+
+
+def validate_final_case_manifest(manifest_path: Path, final_audit_path: Path) -> None:
+    """Validate that dashboard case assets really refer to the frozen audit.
+
+    This intentionally verifies only provenance that can be checked without
+    retraining or reconstruction: source hash, source-row identity, stored
+    orders and image hashes. ``prepare_final_analysis.py`` additionally does a
+    deterministic algorithm replay before writing the manifest.
+    """
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("schema_version") != 2:
+        raise ValueError("unsupported final case manifest schema")
+    source = manifest.get("input", {})
+    digest = hashlib.sha256(final_audit_path.read_bytes()).hexdigest()
+    if source.get("sha256") != digest:
+        raise ValueError("final case manifest does not match the supplied final audit")
+    rows = load_confirmation(final_audit_path)
+    by_id = {
+        f"{row['family_id']}:{row['condition']}:shuffle-{row['shuffle_seed']}": row
+        for row in rows
+    }
+    case_root = manifest_path.parent
+    for category, case in dict(manifest.get("cases", {})).items():
+        row = by_id.get(str(case.get("source_row_id")))
+        if row is None:
+            raise ValueError(f"case {category} is not present in the final audit")
+        rule_order = case.get("stored_predicted_original_orders", {}).get("rule")
+        learned_order = case.get("stored_predicted_original_orders", {}).get("learned")
+        if rule_order != row[f"{RULE_METHOD}_order"] or learned_order != row[f"{LEARNED_METHOD}_order"]:
+            raise ValueError(f"case {category} stored orders disagree with final audit")
+        image = case_root / str(case.get("image", ""))
+        if not image.is_file() or case.get("image_sha256") != hashlib.sha256(image.read_bytes()).hexdigest():
+            raise ValueError(f"case {category} image is missing or has changed")
 
 
 def _method_summary(rows: list[dict[str, Any]], method: str) -> dict[str, float | int]:

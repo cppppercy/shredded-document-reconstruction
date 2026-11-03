@@ -88,6 +88,13 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
+For the final checked Windows environment, use the exact dependency record
+instead of the broad compatibility ranges above:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.lock
+```
+
 ## 运行
 
 ### 命令行演示
@@ -134,7 +141,26 @@ V0.4 的原始外部来源清单和追溯性更正说明分别保存在 `artifac
 .\.venv\Scripts\python.exe scripts\prepare_interactive_model.py
 .\.venv\Scripts\python.exe scripts\run_final_evaluation.py
 .\.venv\Scripts\python.exe scripts\prepare_final_analysis.py
+.\.venv\Scripts\python.exe scripts\run_development_controls.py
 .\.venv\Scripts\python.exe scripts\profile_streamlit_reruns.py
+```
+
+`prepare_interactive_model.py` and `run_final_evaluation.py` now share the
+same fixed V0.4 training families. `prepare_final_analysis.py` defaults only
+to `artifacts/final/independent_evaluation.json`, records its SHA-256 and
+checks stored predictions before it writes dashboard cases. The validation-only
+control experiment is diagnostic evidence about manual versus learned weights;
+it is not another final-test score.
+
+`run_final_evaluation.py` now writes a fresh check under ignored
+`outputs/final_reproduction/` by default, so rerunning it cannot silently
+replace the frozen files in `artifacts/final/`.
+
+With local Chrome and Playwright installed, the browser-driven delivery check
+can be rerun as follows (it saves screenshots and timing evidence locally):
+
+```powershell
+.\.venv\Scripts\python.exe scripts\browser_delivery_check.py
 ```
 
 最后一条记录的是 Streamlit 服务端重跑耗时，不把它冒充为浏览器绘制耗时；真实浏览器布局截图在 `artifacts/final/screenshots/`。

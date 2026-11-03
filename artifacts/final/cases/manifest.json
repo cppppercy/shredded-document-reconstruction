@@ -1,134 +1,384 @@
 {
-  "both_success": {
-    "source": "artifacts/v0.4/ablation.json confirmation_cases",
-    "seed": 12100,
-    "variant": "report",
-    "condition": "clean",
-    "strips": 8,
-    "shuffle_seed": 350959,
-    "rule_order": [
-      0,
-      1,
-      5,
-      7,
-      6,
-      4,
-      2,
-      3
-    ],
-    "learned_order": [
-      0,
-      1,
-      5,
-      7,
-      6,
-      4,
-      2,
-      3
-    ],
-    "rule_exact": true,
-    "learned_exact": true,
-    "image": "both_success.png"
+  "schema_version": 2,
+  "input": {
+    "path": "artifacts/final/independent_evaluation.json",
+    "sha256": "ca8e88b77a2de421268a0f4ed494027cf1f94044656b0f68d053d2399af4742c",
+    "protocol_purpose": "final untouched audit; methods and parameters were fixed before this test",
+    "case_count": 120
   },
-  "rule_only": {
-    "source": "artifacts/v0.4/ablation.json confirmation_cases",
-    "seed": 12100,
-    "variant": "report",
-    "condition": "edge_loss",
-    "strips": 8,
-    "shuffle_seed": 353692,
-    "rule_order": [
-      0,
-      2,
-      6,
-      5,
-      1,
-      3,
-      4,
-      7
+  "model": {
+    "artifact_format": 1,
+    "purpose": "fixed learned model shared by the Streamlit demo and final independent evaluation",
+    "training_split": "V0.4 training document families (24 identities, seeds 9100+ only)",
+    "training_document_ids": [
+      "mixed:9120",
+      "mixed:9121",
+      "mixed:9122",
+      "mixed:9220",
+      "mixed:9221",
+      "mixed:9222",
+      "report:9100",
+      "report:9101",
+      "report:9102",
+      "report:9200",
+      "report:9201",
+      "report:9202",
+      "sparse:9130",
+      "sparse:9131",
+      "sparse:9132",
+      "sparse:9230",
+      "sparse:9231",
+      "sparse:9232",
+      "table:9110",
+      "table:9111",
+      "table:9112",
+      "table:9210",
+      "table:9211",
+      "table:9212"
     ],
-    "learned_order": [
-      3,
-      1,
-      4,
-      7,
-      0,
-      2,
-      5,
-      6
-    ],
-    "rule_exact": true,
-    "learned_exact": false,
-    "image": "rule_only.png"
+    "sample_count": 2224,
+    "feature_version": "v0.3",
+    "max_vertical_shift": 3,
+    "endpoint_multiplier": 0.0,
+    "scikit_learn": "1.9.1",
+    "python": "3.13.7"
   },
-  "learned_only": {
-    "source": "artifacts/v0.4/ablation.json confirmation_cases",
-    "seed": 12100,
-    "variant": "report",
-    "condition": "no_assists",
-    "strips": 8,
-    "shuffle_seed": 351870,
-    "rule_order": [
-      2,
-      7,
-      4,
-      5,
-      3,
-      1,
-      6,
-      0
-    ],
-    "learned_order": [
-      0,
-      2,
-      7,
-      4,
-      5,
-      3,
-      1,
-      6
-    ],
-    "rule_exact": false,
-    "learned_exact": true,
-    "image": "learned_only.png"
-  },
-  "both_fail": {
-    "source": "artifacts/v0.4/ablation.json confirmation_cases",
-    "seed": 12102,
-    "variant": "report",
-    "condition": "edge_loss",
-    "strips": 12,
-    "shuffle_seed": 353750,
-    "rule_order": [
-      4,
-      1,
-      0,
-      2,
-      8,
-      10,
-      3,
-      5,
-      11,
-      7,
-      9,
-      6
-    ],
-    "learned_order": [
-      4,
-      10,
-      3,
-      7,
-      8,
-      5,
-      11,
-      2,
-      1,
-      0,
-      9,
-      6
-    ],
-    "rule_exact": false,
-    "learned_exact": false,
-    "image": "both_fail.png"
+  "cases": {
+    "both_success": {
+      "source_row_id": "report:12100:clean:shuffle-350959",
+      "seed": 12100,
+      "variant": "report",
+      "condition": "clean",
+      "strips": 8,
+      "shuffle_seed": 350959,
+      "stored_predicted_original_orders": {
+        "rule": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "learned": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "replayed_input_orders": {
+        "rule": [
+          0,
+          1,
+          5,
+          7,
+          6,
+          4,
+          2,
+          3
+        ],
+        "learned": [
+          0,
+          1,
+          5,
+          7,
+          6,
+          4,
+          2,
+          3
+        ]
+      },
+      "replayed_predicted_original_orders": {
+        "rule": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "learned": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "rule_exact": true,
+      "learned_exact": true,
+      "image": "both_success.png",
+      "image_sha256": "b7afffb35090f07b4269a1c1a92542c352b8299f0e2abeca5ded587a1a6dc681"
+    },
+    "rule_only": {
+      "source_row_id": "report:12100:edge_loss:shuffle-353692",
+      "seed": 12100,
+      "variant": "report",
+      "condition": "edge_loss",
+      "strips": 8,
+      "shuffle_seed": 353692,
+      "stored_predicted_original_orders": {
+        "rule": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "learned": [
+          5,
+          4,
+          6,
+          7,
+          0,
+          1,
+          3,
+          2
+        ]
+      },
+      "replayed_input_orders": {
+        "rule": [
+          0,
+          2,
+          6,
+          5,
+          1,
+          3,
+          4,
+          7
+        ],
+        "learned": [
+          3,
+          1,
+          4,
+          7,
+          0,
+          2,
+          5,
+          6
+        ]
+      },
+      "replayed_predicted_original_orders": {
+        "rule": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "learned": [
+          5,
+          4,
+          6,
+          7,
+          0,
+          1,
+          3,
+          2
+        ]
+      },
+      "rule_exact": true,
+      "learned_exact": false,
+      "image": "rule_only.png",
+      "image_sha256": "798a9fe9736179af03e6b8bd1913b6d6d598dde26f8f92f76d5a2ea561225197"
+    },
+    "learned_only": {
+      "source_row_id": "report:12100:no_assists:shuffle-351870",
+      "seed": 12100,
+      "variant": "report",
+      "condition": "no_assists",
+      "strips": 8,
+      "shuffle_seed": 351870,
+      "stored_predicted_original_orders": {
+        "rule": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          0
+        ],
+        "learned": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "replayed_input_orders": {
+        "rule": [
+          2,
+          7,
+          4,
+          5,
+          3,
+          1,
+          6,
+          0
+        ],
+        "learned": [
+          0,
+          2,
+          7,
+          4,
+          5,
+          3,
+          1,
+          6
+        ]
+      },
+      "replayed_predicted_original_orders": {
+        "rule": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          0
+        ],
+        "learned": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "rule_exact": false,
+      "learned_exact": true,
+      "image": "learned_only.png",
+      "image_sha256": "d4bb440de327e4f5e5325d94454cbf971479b593526740dfb7c9968978482e0e"
+    },
+    "both_fail": {
+      "source_row_id": "report:12102:edge_loss:shuffle-353750",
+      "seed": 12102,
+      "variant": "report",
+      "condition": "edge_loss",
+      "strips": 12,
+      "shuffle_seed": 353750,
+      "stored_predicted_original_orders": {
+        "rule": [
+          0,
+          9,
+          8,
+          7,
+          4,
+          3,
+          5,
+          1,
+          2,
+          6,
+          10,
+          11
+        ],
+        "learned": [
+          0,
+          3,
+          5,
+          6,
+          4,
+          1,
+          2,
+          7,
+          9,
+          8,
+          10,
+          11
+        ]
+      },
+      "replayed_input_orders": {
+        "rule": [
+          4,
+          1,
+          0,
+          2,
+          8,
+          10,
+          3,
+          5,
+          11,
+          7,
+          9,
+          6
+        ],
+        "learned": [
+          4,
+          10,
+          3,
+          7,
+          8,
+          5,
+          11,
+          2,
+          1,
+          0,
+          9,
+          6
+        ]
+      },
+      "replayed_predicted_original_orders": {
+        "rule": [
+          0,
+          9,
+          8,
+          7,
+          4,
+          3,
+          5,
+          1,
+          2,
+          6,
+          10,
+          11
+        ],
+        "learned": [
+          0,
+          3,
+          5,
+          6,
+          4,
+          1,
+          2,
+          7,
+          9,
+          8,
+          10,
+          11
+        ]
+      },
+      "rule_exact": false,
+      "learned_exact": false,
+      "image": "both_fail.png",
+      "image_sha256": "270c5151851e7cedee1ca6b5f77397c128272c5fb9c2aa002e0322baff43f15d"
+    }
   }
 }

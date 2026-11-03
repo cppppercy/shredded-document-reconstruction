@@ -11,8 +11,7 @@ import joblib
 from PIL import Image
 import streamlit as st
 
-from shredded_reconstruction.conditions import CONDITION_NAMES, observation_condition
-from shredded_reconstruction.learned import train_v03_compatibility_model
+from shredded_reconstruction.model_artifact import train_final_demo_model, validate_model_metadata
 from shredded_reconstruction.shred import compose_strips
 from shredded_reconstruction.ui_reconstruction import predict_both_methods
 from shredded_reconstruction.ui_state import (
@@ -20,7 +19,6 @@ from shredded_reconstruction.ui_state import (
     clear_after_shuffle, clear_after_source_change, prepare_cut,
     shuffle_cut_document,
 )
-from shredded_reconstruction.v03_splits import V03_TRAIN_DOCUMENTS
 from shredded_reconstruction.research_analysis import (
     CONDITION_NAMES_ZH,
     DOCUMENT_TYPE_NAMES,
@@ -38,7 +36,10 @@ from shredded_reconstruction.visualize import (
 ROOT = Path(__file__).resolve().parent
 DEMO_DIRECTORY = ROOT / "demo_documents"
 INTERACTIVE_MODEL = ROOT / "artifacts" / "final" / "interactive_model" / "compatibility_model.joblib"
+INTERACTIVE_MODEL_METADATA = INTERACTIVE_MODEL.with_name("metadata.json")
 VIEW_WIDGET_KEY = "workbench_view_choice"
+MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+MAX_UPLOAD_PIXELS = 24_000_000
 
 # Archive metadata keeps full titles; the chooser uses short projector-friendly labels.
 DISPLAY_TITLES = {
@@ -61,14 +62,15 @@ st.set_page_config(page_title="碎纸文档自动重建", layout="wide", initial
 def get_learning_model():
     """Load the fixed UI model once; predictions still use current strips."""
     if INTERACTIVE_MODEL.exists():
-        return joblib.load(INTERACTIVE_MODEL)
+        if not INTERACTIVE_MODEL_METADATA.exists():
+            raise RuntimeError("Missing model metadata. Run scripts/prepare_interactive_model.py.")
+        model = joblib.load(INTERACTIVE_MODEL)
+        metadata = json.loads(INTERACTIVE_MODEL_METADATA.read_text(encoding="utf-8"))
+        validate_model_metadata(model, metadata)
+        return model
     # This fallback keeps a fresh clone usable before its model artifact is
     # prepared, but normal project use loads the serialized fixed model above.
-    return train_v03_compatibility_model(
-        V03_TRAIN_DOCUMENTS,
-        augmentations=tuple(observation_condition(name) for name in CONDITION_NAMES),
-        endpoint_multiplier=0.0,
-    )
+    return train_final_demo_model()
 
 
 @st.cache_data
@@ -91,6 +93,9 @@ def _demo_preview(filename: str, max_size: tuple[int, int]) -> Image.Image:
 @st.cache_data
 def _uploaded_image(payload: bytes) -> Image.Image:
     with Image.open(io.BytesIO(payload)) as image:
+        if image.width * image.height > MAX_UPLOAD_PIXELS:
+            raise ValueError(f"Image exceeds {MAX_UPLOAD_PIXELS:,} pixels")
+        image.load()
         return image.convert("RGB")
 
 
@@ -154,7 +159,9 @@ def _show_result(name: str, shuffled, result: dict[str, object], mark_errors: bo
     # classroom viewport when the two methods are compared side by side.
     _show_preview(reconstructed, caption=name, max_size=(600, 330))
     _metrics(result)
-    with st.expander(f"{name}的预测顺序与说明"):
+    # Collapsed expanders still execute their bodies.  Delay PNG encoding until
+    # the user actually requests technical details or a download.
+    if st.checkbox(f"显示{name}的预测顺序与说明", key=f"details-{name}"):
         st.code(str(result["metrics"]["predicted_original_order"]), language=None)
         if mark_errors:
             st.caption(_error_note(shuffled, result))
@@ -204,7 +211,9 @@ def _gallery(records: list[dict[str, object]]) -> dict[str, object]:
 
 
 def _large_source_controls(source_image: Image.Image, source_title: str) -> None:
-    with st.expander("查看或下载原始大图"):
+    # An opt-in checkbox avoids resizing and PNG encoding a large page during
+    # every unrelated Streamlit rerun.
+    if st.checkbox("查看或下载原始大图", key="show_original_image"):
         _show_preview(source_image, caption=source_title, max_size=(1120, 820))
         st.download_button(
             "下载原始文档图片", data=_png_bytes(source_image), file_name="selected-document.png",
@@ -315,8 +324,14 @@ with main_tab:
         uploaded = st.file_uploader("上传 PNG/JPG 文档图片", type=("png", "jpg", "jpeg"))
         if uploaded is not None:
             payload = uploaded.getvalue()
-            source_image = _uploaded_image(payload)
-            source_key, source_title = f"upload:{hashlib.sha256(payload).hexdigest()}", uploaded.name
+            if len(payload) > MAX_UPLOAD_BYTES:
+                st.error("上传图片超过 20 MB 限制，请先压缩或缩小图片后重试。")
+            else:
+                try:
+                    source_image = _uploaded_image(payload)
+                    source_key, source_title = f"upload:{hashlib.sha256(payload).hexdigest()}", uploaded.name
+                except (OSError, ValueError) as error:
+                    st.error(f"无法读取这张图片：{error}")
 
     source_changed = clear_after_source_change(st.session_state, source_key)
     if source_changed:

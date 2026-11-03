@@ -17,7 +17,7 @@ from shredded_reconstruction.baseline import reconstruct_baseline
 from shredded_reconstruction.conditions import CONDITION_NAMES, observation_condition
 from shredded_reconstruction.document import generate_document
 from shredded_reconstruction.evaluation import order_metrics
-from shredded_reconstruction.learned import train_v03_compatibility_model
+from shredded_reconstruction.model_artifact import model_metadata, train_final_demo_model
 from shredded_reconstruction.research_analysis import comparison_table, family_bootstrap_interval
 from shredded_reconstruction.shred import shred_document
 from shredded_reconstruction.splits import assert_disjoint_document_splits
@@ -32,19 +32,28 @@ def _shuffle_seed(seed: int, condition_index: int) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "artifacts" / "final")
+    parser.add_argument(
+        "--output-dir", type=Path, default=ROOT / "outputs" / "final_reproduction",
+        help="Write a fresh reproducibility run outside frozen artefacts (default).",
+    )
+    parser.add_argument(
+        "--overwrite-frozen-final", action="store_true",
+        help="Allow replacing artifacts/final after an explicitly authorized new official run.",
+    )
     args = parser.parse_args()
+    frozen = (ROOT / "artifacts" / "final").resolve()
+    if args.output_dir.resolve() == frozen and not args.overwrite_frozen_final:
+        raise ValueError(
+            "artifacts/final is frozen evidence. Use the default outputs/final_reproduction, "
+            "or pass --overwrite-frozen-final only for an authorized new official run."
+        )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     assert_disjoint_document_splits(
         V03_TRAIN_DOCUMENTS, V03_VALIDATION_DOCUMENTS, V03_TEST_DOCUMENTS,
         V04_TRAIN_DOCUMENTS, V04_VALIDATION_DOCUMENTS, V04_CONFIRMATION_DOCUMENTS,
         FINAL_AUDIT_DOCUMENTS,
     )
-    model = train_v03_compatibility_model(
-        V04_TRAIN_DOCUMENTS,
-        augmentations=tuple(observation_condition(name) for name in CONDITION_NAMES),
-        endpoint_multiplier=0.0,
-    )
+    model = train_final_demo_model()
     rows: list[dict[str, object]] = []
     for seed, variant, strip_count in FINAL_AUDIT_DOCUMENTS:
         for condition_index, condition_name in enumerate(CONDITION_NAMES):
@@ -77,6 +86,7 @@ def main() -> int:
             "purpose": "final untouched audit; methods and parameters were fixed before this test",
             "families": len(FINAL_AUDIT_DOCUMENTS), "cases": len(rows), "conditions": list(CONDITION_NAMES),
             "training": "V0.4 training families only; no final-audit page is used in training or selection",
+            "learned_model": model_metadata(model),
             "split_by": "original document identity (variant:seed)", "splits_disjoint": True,
         },
         "overall": comparison_table(rows),

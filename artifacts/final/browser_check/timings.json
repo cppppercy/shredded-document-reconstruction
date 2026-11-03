@@ -1,0 +1,19 @@
+{
+  "environment": {
+    "browser": "local Chrome via Playwright",
+    "viewport": "1366x768",
+    "network": "local loopback"
+  },
+  "timings_seconds": {
+    "cold_open": 10.362368600000082,
+    "warm_open": 5.170668800000385,
+    "large_upload": 5.88343789999999,
+    "upload_to_demo": 0.19359030000032362,
+    "cut": 0.31973699999980454,
+    "shuffle": 0.33370190000005095,
+    "first_reconstruction": 5.033093600000029,
+    "repeat_reconstruction": 0.05952830000023823,
+    "analysis_switch": 7.54173129999981
+  },
+  "notes": "Each value is a browser-driven end-to-end action until the expected Streamlit DOM state appears. It includes local browser and server work, but is not a cross-machine benchmark."
+}

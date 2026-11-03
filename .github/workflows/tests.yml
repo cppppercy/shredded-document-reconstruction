@@ -1,0 +1,21 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core-tests-windows:
+    name: Windows Python 3.13 core tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - name: Install verified dependencies
+        run: python -m pip install -r requirements.lock
+      - name: Run test suite
+        run: python -m pytest -q

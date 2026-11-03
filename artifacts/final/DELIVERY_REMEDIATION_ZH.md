@@ -1,0 +1,25 @@
+# 交付级审查与修复记录
+
+## 问题与处置
+
+| 问题 | 严重度 | 相关文件 | 修复方法 | 验证证据 | 状态 |
+| --- | --- | --- | --- | --- | --- |
+| 最终案例默认读取历史 V0.4 数据 | 高 | `scripts/prepare_final_analysis.py`、`artifacts/final/cases/` | 默认改为冻结最终 JSON；记录输入 SHA-256、源行和图像哈希；拒绝非最终协议 | `test_final_case_manifest_is_tied_to_frozen_final_audit`；确定性重放 | 已完成 |
+| 页面模型和最终实验训练集不同 | 高 | `app.py`、`scripts/prepare_interactive_model.py` | 统一为 V0.4 训练族；模型元数据和 scikit-learn 版本在加载时强校验 | `test_interactive_model_metadata_matches_the_serialized_model` | 已完成 |
+| 折叠区域仍编码大图 | 中 | `app.py` | 用显式复选框延迟原图和下载 PNG 的缩放/编码 | AppTest 页面流程、人工代码审查 | 已完成 |
+| 上传缺少资源边界 | 中 | `app.py`、`.streamlit/config.toml` | 服务端 20 MB 限制；额外限制 2400 万像素并在页面显示错误 | AppTest 大小超限测试 | 已完成 |
+| 规则/学习贡献解释混杂 | 中 | `scripts/run_development_controls.py`、`docs/TEACHER_QA_ZH.md` | 新增验证集控制实验：同九特征、同输入、无端点、无对齐，仅比较人工/学习权重 | 固定 12 族×5 条件的开发验证记录 | 已完成，非最终结论 |
+| 最终类型×条件格样本过少 | 中 | `app.py`、研究说明 | 每格显示样本量；6 页格明确标注不稳定 | 研究页面、`RESEARCH_SUMMARY_ZH.md` | 已完成 |
+| 外部页面被误解为物理碎纸 | 中 | README、中文说明 | 统一标明为完整公开页的模拟竖直裁切；来源与许可保留 | 现有来源 manifest 与说明文档 | 已完成（研究边界） |
+| 浏览器端性能 | 中 | `app.py`、`scripts/browser_delivery_check.py` | 缓存解码/缩略图/模型，分析页惰性渲染，延迟扩展内容工作 | AppTest 性能记录；Chrome 实际演示流截图 | 已完成；跨机器数值不外推 |
+| Windows 临时目录清理警告 | 低 | Python/Streamlit 测试环境 | 不影响断言结果；未用错误方式掩盖 | pytest 成功后仍可复现的 `PermissionError` 清理警告 | 未完全解决，环境残余 |
+
+## 性能口径
+
+`performance_comparison.json` 记录同一 Windows 环境的 Streamlit 服务端 rerun 时间；普通源/视图切换由约 0.55/0.45 秒下降到约 0.20/0.05 秒。首次重建约 0.60 秒，因为确实执行两套局部匹配与全局优化。浏览器截图用于验证真实布局和操作流程，不能把服务端 rerun 数字冒充成浏览器绘制时间。
+
+本次还用本机 Chrome（1366×768、loopback）完成了上传大图、返回演示文档、切条、打乱、两次重建和实验分析切换；原始记录在 `browser_check/timings.json`。该浏览器口径下冷启动 12.27 秒、热启动 6.02 秒、大图上传 6.40 秒、首次重建 2.00 秒、重复重建 0.07 秒、分析切换 6.07 秒。前 3 项与分析切换**没有达到“通常一秒以内”目标**；服务端实际 rerun 较快，但本机浏览器完成页面稳定渲染仍有明显开销，不能以 AppTest 数字掩盖该事实。
+
+## 研究边界
+
+冻结最终集是 24 个新文档族、120 个相关观察案例；按文档族 bootstrap 后总体差异区间跨 0。类型×条件的每格仅 6 页，外部来源仅为少量公开完整页面的模拟裁切。因此本项目给出条件性发现，不声称某一方法普遍更优或已能处理物理碎纸扫描。

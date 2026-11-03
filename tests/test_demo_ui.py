@@ -1,4 +1,5 @@
 from pathlib import Path
+import io
 
 from PIL import Image
 from streamlit.testing.v1 import AppTest
@@ -70,3 +71,55 @@ def test_streamlit_page_starts_idle_then_allows_cut_and_shuffle():
     assert button(app, "shuffle_document").disabled
     assert button(app, "reconstruct_document").disabled
     assert app.radio(key="workbench_view_choice").options == ["文档预览"]
+
+
+def _png_payload() -> bytes:
+    image = Image.new("RGB", (240, 360), "white")
+    output = io.BytesIO()
+    image.save(output, format="PNG")
+    return output.getvalue()
+
+
+def test_upload_can_run_full_reconstruction_and_source_changes_invalidate_results():
+    def button(app, key: str):
+        return next(item for item in app.button if item.key == key)
+
+    app = AppTest.from_file(str(ROOT / "app.py"))
+    app.run(timeout=60)
+    app.radio[1].set_value(app.radio[1].options[1])
+    app.run(timeout=60)
+    app.file_uploader[0].upload("first.png", _png_payload(), "image/png")
+    app.run(timeout=60)
+    assert not app.exception
+    button(app, "cut_document").click()
+    app.run(timeout=60)
+    button(app, "shuffle_document").click()
+    app.run(timeout=60)
+    button(app, "reconstruct_document").click()
+    app.run(timeout=90)
+    assert not app.exception
+    assert "恢复结果" in app.radio(key="workbench_view_choice").options
+
+    app.file_uploader[0].upload("second.png", _png_payload() + b"different", "image/png")
+    app.run(timeout=60)
+    assert not app.exception
+    assert button(app, "shuffle_document").disabled
+    assert button(app, "reconstruct_document").disabled
+    assert app.radio(key="workbench_view_choice").options == ["文档预览"]
+
+
+def test_analysis_page_loads_without_reconstruction_and_upload_limit_is_explained():
+    app = AppTest.from_file(str(ROOT / "app.py"))
+    app.run(timeout=60)
+    app.radio[0].set_value(app.radio[0].options[1])
+    app.run(timeout=60)
+    assert not app.exception
+    assert app.dataframe
+
+    app.radio[0].set_value(app.radio[0].options[0])
+    app.run(timeout=60)
+    app.radio[1].set_value(app.radio[1].options[1])
+    app.run(timeout=60)
+    app.file_uploader[0].upload("too-big.png", b"0" * (20 * 1024 * 1024 + 1), "image/png")
+    app.run(timeout=60)
+    assert any("20 MB" in item.value for item in app.error)

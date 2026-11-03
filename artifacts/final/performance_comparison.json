@@ -1,19 +1,19 @@
 {
   "method": "Streamlit AppTest server-side rerun timing on the same Windows environment; excludes browser paint and network transfer.",
   "before_commit": "b4beb2d",
-  "after_commit": "working tree audit implementation",
+  "after_commit": "delivery remediation implementation",
   "seconds": {
-    "first_open": {"before": 4.3519678, "after": 3.7281981},
-    "open_gallery": {"before": 0.5524693, "after": 0.4088905},
-    "select_other_demo": {"before": 0.3945485, "after": 0.2095763},
-    "demo_to_upload": {"before": 0.2992353, "after": 0.1457786},
-    "upload_to_demo": {"before": 0.4529849, "after": 0.1711414},
-    "switch_analysis": {"before": null, "after": 0.1388133},
-    "back_to_workbench": {"before": null, "after": 0.1584821},
-    "cut": {"before": null, "after": 0.2786833},
-    "shuffle": {"before": null, "after": 0.2982058},
-    "first_reconstruction": {"before": null, "after": 2.0256916},
-    "result_view_switch": {"before": null, "after": 0.1977548}
+    "first_open": {"before": 4.3519678, "after": 2.8888965},
+    "open_gallery": {"before": 0.5524693, "after": 0.1972562},
+    "select_other_demo": {"before": 0.3945485, "after": 0.0562683},
+    "demo_to_upload": {"before": 0.2992353, "after": 0.0677572},
+    "upload_to_demo": {"before": 0.4529849, "after": 0.0460034},
+    "switch_analysis": {"before": null, "after": 0.0739037},
+    "back_to_workbench": {"before": null, "after": 0.0454105},
+    "cut": {"before": null, "after": 0.0563522},
+    "shuffle": {"before": null, "after": 0.0638636},
+    "first_reconstruction": {"before": null, "after": 0.5974419},
+    "result_view_switch": {"before": null, "after": 0.0680455}
   },
   "notes": [
     "The before version did not expose a separate analysis-page radio or a stable result-view control, so those fields have no directly comparable before value.",

@@ -1,0 +1,6 @@
+[server]
+# Reject oversized browser uploads before they enter a Streamlit session.
+maxUploadSize = 20
+
+[browser]
+gatherUsageStats = false
