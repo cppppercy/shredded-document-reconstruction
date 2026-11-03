@@ -7,6 +7,7 @@ import io
 import json
 from pathlib import Path
 
+import joblib
 from PIL import Image
 import streamlit as st
 
@@ -20,6 +21,14 @@ from shredded_reconstruction.ui_state import (
     shuffle_cut_document,
 )
 from shredded_reconstruction.v03_splits import V03_TRAIN_DOCUMENTS
+from shredded_reconstruction.research_analysis import (
+    CONDITION_NAMES_ZH,
+    DOCUMENT_TYPE_NAMES,
+    case_categories,
+    comparison_table,
+    concise_conclusion,
+    load_confirmation,
+)
 from shredded_reconstruction.visualize import (
     fit_for_display, reconstruction_diagnostic, strip_workbench_montage,
     wrong_positions,
@@ -28,6 +37,7 @@ from shredded_reconstruction.visualize import (
 
 ROOT = Path(__file__).resolve().parent
 DEMO_DIRECTORY = ROOT / "demo_documents"
+INTERACTIVE_MODEL = ROOT / "artifacts" / "final" / "interactive_model" / "compatibility_model.joblib"
 VIEW_WIDGET_KEY = "workbench_view_choice"
 
 # Archive metadata keeps full titles; the chooser uses short projector-friendly labels.
@@ -49,7 +59,11 @@ st.set_page_config(page_title="碎纸文档自动重建", layout="wide", initial
 
 @st.cache_resource(show_spinner="正在准备学习匹配模型…")
 def get_learning_model():
-    """Cache the fixed learned model; predictions still use current strips."""
+    """Load the fixed UI model once; predictions still use current strips."""
+    if INTERACTIVE_MODEL.exists():
+        return joblib.load(INTERACTIVE_MODEL)
+    # This fallback keeps a fresh clone usable before its model artifact is
+    # prepared, but normal project use loads the serialized fixed model above.
     return train_v03_compatibility_model(
         V03_TRAIN_DOCUMENTS,
         augmentations=tuple(observation_condition(name) for name in CONDITION_NAMES),
@@ -62,9 +76,31 @@ def load_demo_manifest() -> list[dict[str, object]]:
     return list(json.loads((DEMO_DIRECTORY / "manifest.json").read_text(encoding="utf-8"))["documents"])
 
 
-def _image(record: dict[str, object]) -> Image.Image:
-    with Image.open(DEMO_DIRECTORY / str(record["filename"])) as image:
+@st.cache_data
+def _load_demo_image(filename: str) -> Image.Image:
+    """Decode each bundled page once per Streamlit cache lifetime."""
+    with Image.open(DEMO_DIRECTORY / filename) as image:
         return image.convert("RGB")
+
+
+@st.cache_data
+def _demo_preview(filename: str, max_size: tuple[int, int]) -> Image.Image:
+    return fit_for_display(_load_demo_image(filename), max_size)
+
+
+@st.cache_data
+def _uploaded_image(payload: bytes) -> Image.Image:
+    with Image.open(io.BytesIO(payload)) as image:
+        return image.convert("RGB")
+
+
+@st.cache_data
+def _research_rows() -> list[dict[str, object]]:
+    return load_confirmation(ROOT / "artifacts" / "final" / "independent_evaluation.json")
+
+
+def _image(record: dict[str, object]) -> Image.Image:
+    return _load_demo_image(str(record["filename"]))
 
 
 def _display_title(record: dict[str, object]) -> str:
@@ -79,6 +115,11 @@ def _show_preview(
 ) -> None:
     """Render a proportional UI copy, never the image supplied to solvers."""
     preview = fit_for_display(image, max_size)
+    st.image(preview, caption=caption, width=preview.width)
+
+
+def _show_demo_preview(filename: str, *, caption: str | None = None, max_size: tuple[int, int]) -> None:
+    preview = _demo_preview(filename, max_size)
     st.image(preview, caption=caption, width=preview.width)
 
 
@@ -137,7 +178,7 @@ def _gallery(records: list[dict[str, object]]) -> dict[str, object]:
     selected = by_id[selected_id]
     preview, details, action = st.columns((1, 3, 1))
     with preview:
-        _show_preview(_image(selected), max_size=(112, 88))
+        _show_demo_preview(str(selected["filename"]), max_size=(112, 88))
     with details:
         st.markdown(f"**当前文档：{_display_title(selected)}**")
         st.caption("外部页面已保存在本地，可离线使用。")
@@ -151,7 +192,7 @@ def _gallery(records: list[dict[str, object]]) -> dict[str, object]:
             for column, record in zip(st.columns(5), records[start:start + 5], strict=True):
                 record_id = str(record["id"])
                 with column:
-                    _show_preview(_image(record), max_size=(132, 104))
+                    _show_demo_preview(str(record["filename"]), max_size=(132, 104))
                     st.caption(_display_title(record))
                     if record_id == selected_id:
                         st.button("当前文档", key=f"selected-{record_id}", disabled=True, width="stretch")
@@ -172,38 +213,94 @@ def _large_source_controls(source_image: Image.Image, source_title: str) -> None
 
 
 def _analysis() -> None:
-    st.subheader("固定实验结果")
-    st.caption("以下是已保存的正式实验记录，不是当前操作的即时结果。")
-    historic = ROOT / "artifacts" / "v0.3" / "evaluation.json"
-    if historic.exists():
-        summary = json.loads(historic.read_text(encoding="utf-8"))["final_test_summary"]
-        st.bar_chart({
-            "规则匹配": summary["traditional_v0_2"]["document_mean_adjacency"],
-            "学习匹配": summary["learned_v0_3"]["document_mean_adjacency"],
-        }, horizontal=True)
-        st.caption("历史合成基准：按文档平均的相邻恢复率。")
-    chart = ROOT / "artifacts" / "v0.4" / "ablation-confirmation.png"
-    if chart.exists():
-        with Image.open(chart) as image:
-            _show_preview(image.convert("RGB"), caption="独立确认实验：不同固定配置分别在新文档族上运行。", max_size=(960, 430))
-    success = ROOT / "artifacts" / "v0.4" / "success-v04-usgs-landstat-economic-valuation-10-external_page_simulated_cut-usgs-landstat-economic-valuation-9.png"
-    failure = ROOT / "artifacts" / "v0.4" / "failure-v04-gpo-annual-report-2023-10-external_page_simulated_cut-gpo-annual-report-2023-4.png"
-    if success.exists() and failure.exists():
-        left, right = st.columns(2)
-        with Image.open(success) as image:
-            with left:
-                _show_preview(image.convert("RGB"), caption="外部页面：成功案例", max_size=(560, 390))
-        with Image.open(failure) as image:
-            with right:
-                _show_preview(image.convert("RGB"), caption="外部页面：失败案例", max_size=(560, 390))
-    with st.expander("技术与来源说明"):
-        st.markdown("本页学习匹配加载固定训练划分、五种观测条件轮换和有限上下对齐配置。独立确认实验使用另一组训练文档，二者的数值不可混为同一次评测。")
-        st.markdown("外部页面均为完整公开页面的模拟裁切，不是物理碎纸扫描；详细来源见 `demo_documents/manifest.json`。")
+    """Render only stored, independent confirmation predictions.
+
+    This view intentionally has no model training or image reconstruction work.
+    """
+    rows = _research_rows()
+    conclusion = concise_conclusion(rows)
+    overall = conclusion["overall"]
+    st.subheader("研究结论概览")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("规则匹配", f"{overall['rule_adjacency']:.1%}", "相邻恢复率")
+    c2.metric("学习匹配", f"{overall['learned_adjacency']:.1%}", "相邻恢复率")
+    c3.metric("学习 − 规则", f"{conclusion['delta']:+.1%}", "按文档平均")
+    strongest = conclusion["strongest_condition"]
+    uncertainty = "文档族自助法区间跨过 0，整体差距不足以证明稳定优劣。" if conclusion["uncertain"] else "文档族自助法区间不跨过 0，但仍只适用于本实验的合成条件。"
+    st.info(
+        f"在 24 个独立文档族、120 个固定观察案例中，{conclusion['leader']}整体略高。"
+        f"差异最大的条件是“{CONDITION_NAMES_ZH[str(strongest['condition'])]}”（学习−规则 {float(strongest['adjacency_delta_learned_minus_rule']):+.1%}）。{uncertainty}"
+    )
+
+    st.subheader("按文档类型比较")
+    type_rows = comparison_table(rows, "variant")
+    st.dataframe([
+        {
+            "文档类型": DOCUMENT_TYPE_NAMES[str(row["variant"])], "样本数": row["samples"],
+            "规则相邻恢复率": f"{float(row['rule_adjacency']):.1%}", "学习相邻恢复率": f"{float(row['learned_adjacency']):.1%}",
+            "规则完整恢复率": f"{float(row['rule_exact']):.1%}", "学习完整恢复率": f"{float(row['learned_exact']):.1%}",
+        } for row in type_rows
+    ], width="stretch", hide_index=True)
+
+    st.subheader("按干扰条件比较")
+    condition_rows = comparison_table(rows, "condition")
+    st.dataframe([
+        {
+            "干扰条件": CONDITION_NAMES_ZH[str(row["condition"])], "样本数": row["samples"],
+            "规则相邻恢复率": f"{float(row['rule_adjacency']):.1%}", "学习相邻恢复率": f"{float(row['learned_adjacency']):.1%}",
+            "规则完整恢复率": f"{float(row['rule_exact']):.1%}", "学习完整恢复率": f"{float(row['learned_exact']):.1%}",
+        } for row in condition_rows
+    ], width="stretch", hide_index=True)
+
+    st.subheader("文档类型 × 干扰条件")
+    combinations = comparison_table(rows, "variant", "condition")
+    selected_type = st.selectbox("文档类型", tuple(DOCUMENT_TYPE_NAMES), format_func=lambda value: DOCUMENT_TYPE_NAMES[value], key="analysis_type")
+    selected_condition = st.selectbox("干扰条件", tuple(CONDITION_NAMES_ZH), format_func=lambda value: CONDITION_NAMES_ZH[value], key="analysis_condition")
+    selected = next(row for row in combinations if row["variant"] == selected_type and row["condition"] == selected_condition)
+    st.write({
+        "样本数": selected["samples"],
+        "规则匹配相邻恢复率": f"{float(selected['rule_adjacency']):.1%}",
+        "学习匹配相邻恢复率": f"{float(selected['learned_adjacency']):.1%}",
+        "学习−规则": f"{float(selected['adjacency_delta_learned_minus_rule']):+.1%}",
+    })
+    if int(selected["samples"]) < 10:
+        st.caption("该组合只有少量独立页面（每格 6 例），只能作为提示，不能据此断言一种方法更适合。")
+
+    st.subheader("成功与失败案例")
+    categories = case_categories(rows)
+    labels = {
+        "both_success": "两种方法都成功", "rule_only": "规则匹配成功、学习匹配失败",
+        "learned_only": "学习匹配成功、规则匹配失败", "both_fail": "两种方法都失败",
+    }
+    category = st.selectbox("案例类型", tuple(labels), format_func=lambda key: f"{labels[key]}（{len(categories[key])} 例）")
+    candidate = categories[category][0]
+    st.caption(
+        f"保存的确认集案例：{DOCUMENT_TYPE_NAMES[str(candidate['variant'])]}；"
+        f"{CONDITION_NAMES_ZH[str(candidate['condition'])]}；{candidate['strips']} 条纸条。"
+        "下方图像由该案例已保存的预测顺序重放；不是手工拼接。"
+    )
+    asset = ROOT / "artifacts" / "final" / "cases" / f"{category}.png"
+    if asset.exists():
+        with Image.open(asset) as image:
+            _show_preview(image.convert("RGB"), max_size=(1100, 640))
+    else:
+        st.warning("案例图尚未生成；请运行 scripts/prepare_final_analysis.py。")
+
+    with st.expander("研究附录：技术对照与实验边界"):
+        st.markdown(
+        "本页仅展示两个实际使用的方法，数据来自未参与开发决策的最终确认集。历史消融实验仍保留在 `artifacts/v0.4/`："
+            "它检验端点辅助项、干扰训练和上下对齐特征的贡献，不能与这里的两方法表混为同一次结论。"
+        )
+        st.markdown("所有外部页面测试均为完整公开页面的模拟竖直裁切，不是物理碎纸扫描。")
 
 
 st.title("碎纸文档自动重建")
 st.caption("选择一页文档，依次切条、打乱，再比较两种自动重建结果。")
-main_tab, analysis_tab = st.tabs(["自动重建", "实验分析"])
+page = st.radio("页面", ("自动重建", "实验分析"), horizontal=True, label_visibility="collapsed")
+if page == "实验分析":
+    _analysis()
+    st.stop()
+main_tab = st.container()
 
 with main_tab:
     mode = st.radio("文档来源", ("演示文档", "上传图片"), horizontal=True)
@@ -218,7 +315,7 @@ with main_tab:
         uploaded = st.file_uploader("上传 PNG/JPG 文档图片", type=("png", "jpg", "jpeg"))
         if uploaded is not None:
             payload = uploaded.getvalue()
-            source_image = Image.open(io.BytesIO(payload)).convert("RGB")
+            source_image = _uploaded_image(payload)
             source_key, source_title = f"upload:{hashlib.sha256(payload).hexdigest()}", uploaded.name
 
     source_changed = clear_after_source_change(st.session_state, source_key)
@@ -245,6 +342,8 @@ with main_tab:
             with st.expander("资料来源"):
                 st.caption(str(selected["license_note"]))
                 st.link_button("打开原始资料页", str(selected["source_page_url"]), width="stretch")
+        with st.expander("方法说明"):
+            st.caption("学习匹配加载固定的交互模型文件；两种方法始终使用当前同一组打乱纸条。页面即时准确率只描述这次操作，不能与独立研究页的最终确认数字混用。")
 
     if cut_clicked and source_image is not None:
         st.session_state[CUT_KEY] = prepare_cut(source_image, strip_count)
@@ -310,6 +409,3 @@ with main_tab:
                     _show_result("规则匹配", shuffled, results["rule"], mark_errors)
                 with right:
                     _show_result("学习匹配", shuffled, results["learned"], mark_errors)
-
-with analysis_tab:
-    _analysis()

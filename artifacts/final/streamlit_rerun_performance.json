@@ -1,0 +1,16 @@
+{
+  "scope": "server-side Streamlit rerun time; excludes browser paint",
+  "seconds": {
+    "first_open": 3.728198099999645,
+    "open_gallery": 0.4088904999989609,
+    "select_other_demo": 0.20957629999975325,
+    "demo_to_upload": 0.14577859999917564,
+    "upload_to_demo": 0.17114140000012412,
+    "switch_analysis": 0.138813300000038,
+    "back_to_workbench": 0.15848209999967366,
+    "cut": 0.278683299999102,
+    "shuffle": 0.2982057999997778,
+    "first_reconstruction": 2.0256915999998455,
+    "result_view_switch": 0.19775480000134849
+  }
+}

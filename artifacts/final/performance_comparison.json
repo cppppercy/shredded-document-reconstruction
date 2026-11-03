@@ -1,0 +1,23 @@
+{
+  "method": "Streamlit AppTest server-side rerun timing on the same Windows environment; excludes browser paint and network transfer.",
+  "before_commit": "b4beb2d",
+  "after_commit": "working tree audit implementation",
+  "seconds": {
+    "first_open": {"before": 4.3519678, "after": 3.7281981},
+    "open_gallery": {"before": 0.5524693, "after": 0.4088905},
+    "select_other_demo": {"before": 0.3945485, "after": 0.2095763},
+    "demo_to_upload": {"before": 0.2992353, "after": 0.1457786},
+    "upload_to_demo": {"before": 0.4529849, "after": 0.1711414},
+    "switch_analysis": {"before": null, "after": 0.1388133},
+    "back_to_workbench": {"before": null, "after": 0.1584821},
+    "cut": {"before": null, "after": 0.2786833},
+    "shuffle": {"before": null, "after": 0.2982058},
+    "first_reconstruction": {"before": null, "after": 2.0256916},
+    "result_view_switch": {"before": null, "after": 0.1977548}
+  },
+  "notes": [
+    "The before version did not expose a separate analysis-page radio or a stable result-view control, so those fields have no directly comparable before value.",
+    "A real Chrome visual run was also performed for layout screenshots; AppTest numbers are reported only as server-side rerun timings.",
+    "First reconstruction intentionally remains above one second because it performs two genuine compatibility/global-order computations. Ordinary source and view changes are below 0.5 seconds in this measurement."
+  ]
+}

@@ -128,6 +128,17 @@ python -m venv .venv
 
 V0.4 的原始外部来源清单和追溯性更正说明分别保存在 `artifacts/v0.4/external/external_sources.json` 与 [`MANIFEST_CORRECTION.md`](artifacts/v0.4/external/MANIFEST_CORRECTION.md)；更正不改变历史实验数字。
 
+### 重现最终独立确认与研究页案例
+
+```powershell
+.\.venv\Scripts\python.exe scripts\prepare_interactive_model.py
+.\.venv\Scripts\python.exe scripts\run_final_evaluation.py
+.\.venv\Scripts\python.exe scripts\prepare_final_analysis.py
+.\.venv\Scripts\python.exe scripts\profile_streamlit_reruns.py
+```
+
+最后一条记录的是 Streamlit 服务端重跑耗时，不把它冒充为浏览器绘制耗时；真实浏览器布局截图在 `artifacts/final/screenshots/`。
+
 ## 测试
 
 ```powershell
@@ -162,6 +173,12 @@ artifacts/v0.3/               V0.3 CSV、JSON、页面、成功和失败案例
 - 对真实物理碎纸扫描建立带人工标注的小规模数据集；不要把模拟裁切冒充为物理实验。
 - 针对边缘缺失设计更鲁棒的局部表示，并研究首尾方向不确定时的全局建模。
 - 扩展到旋转、重叠与不规则碎片之前，先保持可复现的外部页面基准。
+
+## 最终独立确认（当前研究结论）
+
+为避免把已用于开发的历史确认集继续当作最终证据，项目新增了一个按原始文档身份隔离的最终集：24 个新文档族、5 种固定观察条件、共 120 个案例。规则匹配的文档平均相邻恢复率为 **80.73%**，学习匹配为 **78.32%**；学习减规则的文档族自助法 95% 区间为 **[−6.63, +1.62] 个百分点**，因此不能声称任一方法总体稳定更优。
+
+更有意义的结论是条件性的：学习匹配在无明显边框/纹理条件下更强，而规则匹配在上下错位和图文混排条件下更可靠。逐案例 JSON/CSV、组合统计和四类可复现案例在 [`artifacts/final/`](artifacts/final/)；中文研究总结见 [`docs/RESEARCH_SUMMARY_ZH.md`](docs/RESEARCH_SUMMARY_ZH.md)，最新五分钟讲稿见 [`docs/FINAL_PRESENTATION_ZH.md`](docs/FINAL_PRESENTATION_ZH.md)。
 
 ## License
 

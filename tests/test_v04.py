@@ -9,6 +9,7 @@ from shredded_reconstruction.splits import (
 )
 from shredded_reconstruction.v03_splits import V03_TEST_DOCUMENTS, V03_TRAIN_DOCUMENTS, V03_VALIDATION_DOCUMENTS
 from shredded_reconstruction.v04_splits import V04_CONFIRMATION_DOCUMENTS, V04_TRAIN_DOCUMENTS, V04_VALIDATION_DOCUMENTS
+from shredded_reconstruction.v05_splits import FINAL_AUDIT_DOCUMENTS
 
 
 def test_v04_document_families_are_new_and_disjoint() -> None:
@@ -24,3 +25,12 @@ def test_v04_document_families_are_new_and_disjoint() -> None:
         V04_CONFIRMATION_DOCUMENTS,
     )
     assert len(document_ids(V04_CONFIRMATION_DOCUMENTS)) == 24
+
+
+def test_final_audit_document_families_are_new_and_disjoint() -> None:
+    assert_disjoint_document_splits(
+        V03_TRAIN_DOCUMENTS, V03_VALIDATION_DOCUMENTS, V03_TEST_DOCUMENTS,
+        V04_TRAIN_DOCUMENTS, V04_VALIDATION_DOCUMENTS, V04_CONFIRMATION_DOCUMENTS,
+        FINAL_AUDIT_DOCUMENTS,
+    )
+    assert len(document_ids(FINAL_AUDIT_DOCUMENTS)) == 24
