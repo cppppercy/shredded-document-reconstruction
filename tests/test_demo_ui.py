@@ -18,15 +18,23 @@ def test_diagnostic_marks_wrong_reconstruction_positions():
     assert wrong_positions(order, original_indices) == [1, 2]
 
 
-def test_streamlit_page_runs_success_and_failure_showcases():
+def test_streamlit_page_starts_idle_then_allows_cut_and_shuffle():
     app = AppTest.from_file(str(ROOT / "app.py"))
     app.run(timeout=60)
     assert not app.exception
     assert any("碎纸文档自动重建" in heading.value for heading in app.title)
-    assert any("传统 V0.2" in heading.value for heading in app.subheader)
+    assert not any("重建结果" == heading.value for heading in app.subheader)
+    assert app.button[1].disabled
+    assert app.button[2].disabled
 
-    app.radio[0].set_value("失败示例")
     app.button[0].click()
     app.run(timeout=60)
     assert not app.exception
-    assert any("红框位置" in info.value for info in app.info)
+    assert any("纸条（保持原顺序）" == heading.value for heading in app.subheader)
+    assert not app.button[1].disabled
+
+    app.button[1].click()
+    app.run(timeout=60)
+    assert not app.exception
+    assert any("打乱后的纸条" == heading.value for heading in app.subheader)
+    assert not app.button[2].disabled

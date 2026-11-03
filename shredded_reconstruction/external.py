@@ -85,6 +85,11 @@ def _download(url: str, destination: Path) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def source_manifest(sources: tuple[ExternalSource, ...], records: list[dict[str, object]]) -> dict[str, object]:
+    """Build provenance for the exact collection of sources just rendered."""
+    return {"sources": [asdict(source) for source in sources], "pages": records}
+
+
 def prepare_pages_for_sources(
     output_dir: Path,
     cache_dir: Path,
@@ -123,7 +128,9 @@ def prepare_pages_for_sources(
                         "source_page_url": source.source_page_url,
                         "license_note": source.license_note,
                         "page_number_one_based": page_index + 1,
-                        "rendered_file": str(Path("pages") / filename),
+                        # Persist a portable relative path; Windows backslashes
+                        # in JSON made manifests awkward to consume elsewhere.
+                        "rendered_file": (Path("pages") / filename).as_posix(),
                         "pdf_sha256": sha256,
                         "usage": "external full page, then simulated vertical cutting and shuffling; never model training",
                     }
@@ -131,10 +138,7 @@ def prepare_pages_for_sources(
         finally:
             document.close()
         sleep(0.2)
-    (output_dir / "external_sources.json").write_text(
-        json.dumps({"sources": [asdict(source) for source in EXTERNAL_SOURCES], "pages": records}, indent=2),
-        encoding="utf-8",
-    )
+    (output_dir / "external_sources.json").write_text(json.dumps(source_manifest(sources, records), indent=2), encoding="utf-8")
     return records
 
 

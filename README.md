@@ -100,13 +100,15 @@ python -m venv .venv
 
 方法名与实现一一对应：`traditional-v0.1`、`traditional-v0.2`、`learned-v0.1`、`learned-v0.2`、`learned-v0.3`。结果写入 Git 忽略的 `outputs/demo/`。
 
-### Streamlit 课堂演示
+### Streamlit 交互演示
 
 ```powershell
 .\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-页面提供一键成功/失败示例、合成随机测试、传统 V0.2 与学习模型对照，以及上传 PNG/JPG 文档页。上传页也会先切条和打乱；真实顺序只用于最终可视化指标，绝不作为预测输入。
+页面提供离线文档图库（10 张文字、表格、图文混排及公开外部页面）和 PNG/JPG 上传。操作流程被拆成四步：**选择文档 → 切成纸条 → 随机打乱 → 开始重建**。规则匹配和学习匹配始终使用同一组当前打乱的输入；真实顺序只在预测完成后用于显示准确率和错误位置，绝不作为预测输入。
+
+演示图库在 [`demo_documents/`](demo_documents/)，其中的外部页面来源和许可记录在 `manifest.json`，因此断网仍可使用。面向课程学生的原理说明见 [`docs/PROJECT_GUIDE_ZH.md`](docs/PROJECT_GUIDE_ZH.md)，1～2 分钟的现场演示步骤见 [`docs/CLASSROOM_DEMO_ZH.md`](docs/CLASSROOM_DEMO_ZH.md)。
 
 ### 重跑正式评测
 
@@ -123,6 +125,8 @@ python -m venv .venv
 ```
 
 该脚本会以新文档族重新训练固定的消融配置，运行 120 个确认案例，并下载三个公开 PDF 缓存到 Git 忽略的 `.tmp/`；正式 CSV、JSON、图表、成功/失败图与来源说明保存到 `artifacts/v0.4/`。
+
+V0.4 的原始外部来源清单和追溯性更正说明分别保存在 `artifacts/v0.4/external/external_sources.json` 与 [`MANIFEST_CORRECTION.md`](artifacts/v0.4/external/MANIFEST_CORRECTION.md)；更正不改变历史实验数字。
 
 ## 测试
 
@@ -143,8 +147,11 @@ shredded_reconstruction/
   learned.py        scikit-learn 学习兼容度模型
   optimizer.py      Held–Karp 全局排列优化
   external.py       外部公开页面下载、渲染和来源记录
+  ui_state.py       Streamlit 的切条/打乱/预测状态转换
   v03_splits.py     V0.3 文档族训练/验证/最终测试划分
 scripts/run_v03_evaluation.py  固定评测、选参与外部页面测试
+demo_documents/               离线演示页面与来源清单
+docs/                         中文项目原理与课堂演示说明
 artifacts/v0.1/               保留的历史记录
 artifacts/v0.2/               保留的历史记录
 artifacts/v0.3/               V0.3 CSV、JSON、页面、成功和失败案例

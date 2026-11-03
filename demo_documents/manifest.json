@@ -1,0 +1,95 @@
+{
+  "description": "Offline demo pages. External pages are full pages that may later be simulatedly cut; they are not physical-shred scans.",
+  "documents": [
+    {
+      "id": "external-usgs-landstat-economic-valuation-page-03",
+      "filename": "external-usgs-landstat-economic-valuation-page-03.png",
+      "title": "USGS Open-File Report 2019-1112: Economic valuation of Landsat imagery（第 3 页）",
+      "kind": "external",
+      "source_id": "usgs-landstat-economic-valuation",
+      "source_page_url": "https://pubs.usgs.gov/publication/ofr20191112",
+      "license_note": "USGS states that its published-report PDFs are public domain; this report notes any exceptions within the text."
+    },
+    {
+      "id": "external-usgs-landstat-economic-valuation-page-09",
+      "filename": "external-usgs-landstat-economic-valuation-page-09.png",
+      "title": "USGS Open-File Report 2019-1112: Economic valuation of Landsat imagery（第 9 页）",
+      "kind": "external",
+      "source_id": "usgs-landstat-economic-valuation",
+      "source_page_url": "https://pubs.usgs.gov/publication/ofr20191112",
+      "license_note": "USGS states that its published-report PDFs are public domain; this report notes any exceptions within the text."
+    },
+    {
+      "id": "external-nist-digital-identity-guidelines-page-06",
+      "filename": "external-nist-digital-identity-guidelines-page-06.png",
+      "title": "NIST SP 800-63A-4: Digital Identity Guidelines（第 6 页）",
+      "kind": "external",
+      "source_id": "nist-digital-identity-guidelines",
+      "source_page_url": "https://csrc.nist.gov/pubs/sp/800/63/a/4/final",
+      "license_note": "NIST states this publication is not subject to copyright in the United States (17 U.S.C. 105)."
+    },
+    {
+      "id": "external-nist-digital-identity-guidelines-page-16",
+      "filename": "external-nist-digital-identity-guidelines-page-16.png",
+      "title": "NIST SP 800-63A-4: Digital Identity Guidelines（第 16 页）",
+      "kind": "external",
+      "source_id": "nist-digital-identity-guidelines",
+      "source_page_url": "https://csrc.nist.gov/pubs/sp/800/63/a/4/final",
+      "license_note": "NIST states this publication is not subject to copyright in the United States (17 U.S.C. 105)."
+    },
+    {
+      "id": "external-gpo-annual-report-2023-page-04",
+      "filename": "external-gpo-annual-report-2023-page-04.png",
+      "title": "U.S. Government Publishing Office Annual Report 2023（第 4 页）",
+      "kind": "external",
+      "source_id": "gpo-annual-report-2023",
+      "source_page_url": "https://www.govinfo.gov/app/details/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da",
+      "license_note": "The GovInfo record states this U.S. Government work is not subject to copyright under 17 U.S.C. 105."
+    },
+    {
+      "id": "external-gpo-annual-report-2023-page-11",
+      "filename": "external-gpo-annual-report-2023-page-11.png",
+      "title": "U.S. Government Publishing Office Annual Report 2023（第 11 页）",
+      "kind": "external",
+      "source_id": "gpo-annual-report-2023",
+      "source_page_url": "https://www.govinfo.gov/app/details/GOVPUB-GP-d7a27c6b9d380a16190fb4651b2e74da",
+      "license_note": "The GovInfo record states this U.S. Government work is not subject to copyright under 17 U.S.C. 105."
+    },
+    {
+      "id": "synthetic-report",
+      "filename": "synthetic-report.png",
+      "title": "合成示例：文字报告",
+      "kind": "synthetic",
+      "source_id": null,
+      "source_page_url": null,
+      "license_note": "Project-generated demonstration page."
+    },
+    {
+      "id": "synthetic-table",
+      "filename": "synthetic-table.png",
+      "title": "合成示例：数据表格",
+      "kind": "synthetic",
+      "source_id": null,
+      "source_page_url": null,
+      "license_note": "Project-generated demonstration page."
+    },
+    {
+      "id": "synthetic-mixed",
+      "filename": "synthetic-mixed.png",
+      "title": "合成示例：图文混排",
+      "kind": "synthetic",
+      "source_id": null,
+      "source_page_url": null,
+      "license_note": "Project-generated demonstration page."
+    },
+    {
+      "id": "synthetic-sparse",
+      "filename": "synthetic-sparse.png",
+      "title": "合成示例：稀疏版式",
+      "kind": "synthetic",
+      "source_id": null,
+      "source_page_url": null,
+      "license_note": "Project-generated demonstration page."
+    }
+  ]
+}
